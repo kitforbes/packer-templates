@@ -1,0 +1,63 @@
+{
+  "builders": [
+    {
+      "name": "test",
+      "type": "hyperv-iso",
+      "output_directory": "output/{{ user `os_name` }}-base-hyperv/",
+      "vm_name": "{{ user `os_name` }}-base",
+      "iso_url": "{{ user `iso_url` }}",
+      "iso_checksum": "{{ user `iso_checksum` }}",
+      "iso_checksum_type": "{{ user `iso_checksum_type` }}",
+      "communicator": "winrm",
+      "winrm_username": "vagrant",
+      "winrm_password": "vagrant",
+      "winrm_timeout": "12h",
+      "shutdown_command": "A:/PackerShutdown.bat",
+      "shutdown_timeout": "1h",
+      "floppy_files": [
+        "answer_files/{{ user `os_name` }}/Autounattend.xml",
+        "floppy/winrm.ps1",
+        "floppy/PackerShutdown.bat",
+        "floppy/postunattend.xml"
+      ],
+      "cpu": 1,
+      "disk_size": 81920,
+      "ram_size": 4096,
+      "generation": 1,
+      "boot_wait": "0s",
+      "boot_command": [
+        "a<wait>a<wait>a"
+      ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "scripts/install_powershell.ps1",
+      "destination": "C:\\Windows\\Temp\\install_powershell.ps1"
+    },
+    {
+      "type": "windows-shell",
+      "inline": [
+        "cmd.exe /c powershell.exe -File C:\\Windows\\Temp\\install_powershell.ps1"
+      ]
+    },
+    {
+      "type": "windows-restart",
+      "restart_timeout": "1h"
+    },
+    {
+      "type": "powershell",
+      "script": "scripts/verify.ps1",
+      "elevated_user": "vagrant",
+      "elevated_password": "vagrant"
+    }
+  ],
+  "post-processors": [],
+  "variables": {
+    "os_name": "",
+    "iso_checksum": "",
+    "iso_checksum_type": "",
+    "iso_url": ""
+  }
+}
