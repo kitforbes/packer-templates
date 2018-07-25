@@ -1,0 +1,40 @@
+require 'cookstyle'
+require 'foodcritic'
+require 'kitchen'
+require 'rubocop/rake_task'
+require 'rspec/core/rake_task'
+
+namespace :style do
+  desc 'Run RuboCop style checks'
+  RuboCop::RakeTask.new(:ruby) do |task|
+  end
+
+  desc 'Run Chef style checks'
+  FoodCritic::Rake::LintTask.new(:chef) do |task|
+    task.options = {
+      context: true,
+      fail_tags: ['any'],
+    }
+  end
+end
+
+desc 'Run style checks'
+task style: %i( style:ruby style:chef )
+
+desc 'Run ChefSpec examples'
+RSpec::Core::RakeTask.new(:unit) do |task|
+  task.pattern = RSpec::Core::RakeTask::DEFAULT_PATTERN
+  task.rspec_opts = '--color --format documentation --require spec_helper'
+end
+
+desc 'Run Test Kitchen'
+task :integration do
+  Kitchen.logger = Kitchen.default_file_logger
+  Kitchen::Config.new.instances.each do |instance|
+    instance.test(:always)
+  end
+end
+
+task full: %w( style unit integration )
+
+task default: %w( style unit )

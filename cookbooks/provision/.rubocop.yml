@@ -1,0 +1,9 @@
+AllCops:
+  DisplayCopNames: true
+  DisplayStyleGuide: true
+  UseCache: false
+
+Layout/EndOfLine:
+  EnforcedStyle: lf
+  # TODO: Fix line ending on Windows
+  Enabled: false

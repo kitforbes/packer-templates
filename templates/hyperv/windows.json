@@ -52,6 +52,28 @@
       "script": "scripts/verify.ps1",
       "elevated_user": "vagrant",
       "elevated_password": "vagrant"
+    },
+    {
+      "type": "chef-solo",
+      "cookbook_paths": [
+        "vendor/cookbooks"
+      ],
+      "version": "",
+      "guest_os_type": "windows",
+      "prevent_sudo": true,
+      "run_list": [
+        "provision::chocolatey",
+        "provision::powershell",
+        "provision::powershell_modules"
+      ]
+    },
+    {
+      "type": "powershell",
+      "scripts": [
+        "scripts/uninstall_chef.ps1"
+      ],
+      "elevated_user": "vagrant",
+      "elevated_password": "vagrant"
     }
   ],
   "post-processors": [
