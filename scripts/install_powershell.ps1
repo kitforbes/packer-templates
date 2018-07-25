@@ -1,5 +1,7 @@
 $ErrorActionPreference = 'Stop'
 
+. A:\utilities.ps1
+
 function Start-WindowsUpdateService () {
     if ((Get-Service -Name wuauserv).Status -eq "Stopped") {
         Get-Service -Name wuauserv | Start-Service
@@ -45,32 +47,31 @@ function Get-PowerShell ($Source, $Destination, $Checksum) {
 
 function Expand-MsuFile ($Package) {
     Write-Output "Extracting '$Package'..."
-    $process = Start-Process -FilePath "$env:WinDir\System32\wusa.exe" -ArgumentList "$env:WinDir\Temp\$Package", "/extract:$env:WinDir\Temp", "/log:$env:WinDir\Temp\$($Package.Replace(".msu", ".log"))" -NoNewWindow -Wait -PassThru
-    $process.WaitForExit()
+    $result = Invoke-Process -FilePath "$env:WinDir\System32\wusa.exe" -ArgumentList "$env:WinDir\Temp\$Package", "/extract:$env:WinDir\Temp", "/log:$env:WinDir\Temp\$($Package.Replace(".msu", ".log"))"
 
-    if ($process.ExitCode -ne 0) {
+    if ($result -ne 0) {
         Get-Content -Path "$env:WinDir\Temp\$($Package.Replace(".msu", ".log"))"
         Get-ChildItem -Path "$env:WinDir\Temp"
-        Write-Output "Wusa Error: $($process.ExitCode)"
-        exit $process.ExitCode
+        Write-Output "Wusa Error: $($result)"
+        exit $result
     }
 }
 
 function Install-CabFile ($Package) {
     Write-Output "Installing '$Package'..."
-    $process = Start-Process -FilePath "$env:WinDir\System32\Dism.exe" -ArgumentList '/online', '/add-package', "/PackagePath:$env:WinDir\Temp\$Package", '/Quiet', '/NoRestart' -NoNewWindow -Wait -PassThru
-    $process.WaitForExit()
-    if (0, 3010 -notcontains $process.ExitCode) {
+    $result = Invoke-Process -FilePath "$env:WinDir\System32\Dism.exe" -ArgumentList '/online', '/add-package', "/PackagePath:$env:WinDir\Temp\$Package", '/Quiet', '/NoRestart'
+    if (0, 3010 -notcontains $result) {
         Get-Content -Path "$env:WinDir\Logs\DISM\dism.log"
-        Write-Output "", "Dism Error: $($process.ExitCode)"
-        exit $process.ExitCode
+        Write-Output "", "Dism Error: $($result)"
+        exit $result
     }
 }
 
-$powershellVersion = $PSVersionTable.PSVersion.ToString().Split('.')[0..1] -join '.'
-$osVersion = (Get-CimInstance Win32_OperatingSystem).Version.Split('.')[0..1] -join '.'
+$powershellVersion = (Get-PowerShellVersion).Split('.')[0..1] -join '.'
+$osVersion = (Get-OperatingSystemVersion).Split('.')[0..1] -join '.'
 
 Write-Output "Operating System Version: $osVersion"
+Write-Output "Current PowerShell Version: $powershellVersion"
 switch ($osVersion) {
     '6.1' {
         if ($env:PROCESSOR_ARCHITECTURE -eq 'x86') {
@@ -112,7 +113,7 @@ switch ($osVersion) {
 }
 
 if ($PSVersionTable.PSVersion.Major -ge 5) {
-    Write-Output "Not installing PowerShell as $($PSVersionTable.PSVersion.ToString()) is already installed."
+    Write-Output "Not installing PowerShell as $powershellVersion is already installed."
     exit 0
 }
 

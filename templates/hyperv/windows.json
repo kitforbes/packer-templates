@@ -16,6 +16,7 @@
       "shutdown_timeout": "1h",
       "floppy_files": [
         "answer_files/{{ user `os_name` }}/Autounattend.xml",
+        "floppy/utilities.ps1",
         "floppy/winrm.ps1",
         "floppy/PackerShutdown.bat",
         "floppy/postunattend.xml"

@@ -10,5 +10,6 @@ Write-Output "PACKER_HTTP_ADDR    : $env:PACKER_HTTP_ADDR"
 
 $powerShellVersion = "$($PSVersionTable.PSVersion.Major).$($PSVersionTable.PSVersion.Minor)"
 if ($powerShellVersion -ne "5.1") {
+    Write-Output "Failing due to PowerShell 5.1 not being present, found v$powerShellVersion"
     exit 1
 }

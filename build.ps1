@@ -25,6 +25,56 @@ if (-not $PSScriptRoot) {
 $isVerbose = [System.Management.Automation.ActionPreference]::SilentlyContinue -ne $VerbosePreference
 $isDebug = [System.Management.Automation.ActionPreference]::SilentlyContinue -ne $DebugPreference
 
+function Remove-File {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)]
+        [String]
+        $Path
+    )
+
+    end {
+        if (Test-Path -Path $Path) {
+            Remove-Item -Force -Path $Path
+        }
+    }
+}
+
+function Remove-Directory {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)]
+        [String]
+        $Path
+    )
+
+    end {
+        if (Test-Path -Path $Path) {
+            Remove-Item -Force -Path $Path -Recurse
+        }
+    }
+}
+
+function Invoke-Process {
+    [CmdletBinding()]
+    [OutputType([Int])]
+    param (
+        [Parameter(Mandatory)]
+        [String]
+        $FilePath,
+        [Parameter(Mandatory)]
+        [String[]]
+        $ArgumentList
+    )
+
+    end {
+        Write-Verbose -Message "Executing: '$FilePath $($ArgumentList -join ' ')'"
+        $process = Start-Process -FilePath $FilePath -ArgumentList $ArgumentList -NoNewWindow -PassThru -Wait
+        $process.WaitForExit()
+        return $process.ExitCode
+    }
+}
+
 $data = Get-Content -Path "$PSScriptRoot\build.data.json" | ConvertFrom-Json
 foreach ($datum in $data) {
     if ($datum.name -eq $Name) {
@@ -54,10 +104,25 @@ else {
     Write-Verbose -Message "Environment Variable not specified, using default ISO URL"
 }
 
-$template
+if ($isVerbose) {
+    $template
+}
 
-if (Test-Path -Path "$PSScriptRoot/logs/packer.log") {
-    Remove-Item -Force -Recurse -Path "$PSScriptRoot/logs/packer.log"
+Remove-File -Path "$PSScriptRoot/logs/packer.log"
+Write-Output '', "==> Removing vendored cookbooks..."
+Remove-Directory -Path "$PSScriptRoot\vendor\cookbooks"
+
+$cookbooks = @('provision')
+foreach ($cookbook in $cookbooks) {
+    Write-Output '', "==> Testing '$cookbook' cookbook..."
+    $result = Invoke-Process -FilePath 'chef' -ArgumentList 'exec', 'rake', '--rakefile', "$PSScriptRoot\cookbooks\$cookbook\Rakefile"
+    if ($result -ne 0) { exit $result }
+}
+
+foreach ($cookbook in $cookbooks) {
+    Write-Output "==> Acquiring dependencies for '$cookbook' cookbook..."
+    $result = Invoke-Process -FilePath 'chef' -ArgumentList 'exec', 'berks', 'vendor', "$PSScriptRoot\vendor\cookbooks", "--berksfile=$PSScriptRoot\cookbooks\$cookbook\Berksfile", '--no-delete'
+    if ($result -ne 0) { exit $result}
 }
 
 $env:CHECKPOINT_DISABLE = 1
@@ -75,20 +140,14 @@ $variables = @(
     '--var', "`"iso_url=$($template.IsoUrl)`""
 )
 
-$process = $null
-$process = Start-Process -FilePath 'packer' -ArgumentList (@('validate', "--only=$($Action.ToLower())") + $variables + @($templateFilePath)) -NoNewWindow -Wait -PassThru
-$process.WaitForExit()
-if ($process.ExitCode -ne 0) { exit $process.ExitCode }
+$result = Invoke-Process -FilePath 'packer' -ArgumentList (@('validate', "--only=$($Action.ToLower())") + $variables + @($templateFilePath))
+if ($result -ne 0) { exit $result }
 
 Write-Output '', "==> Inspecting template..."
-$process = $null
-$process = Start-Process -FilePath "packer" -ArgumentList 'inspect', $templateFilePath -NoNewWindow -Wait -PassThru
-$process.WaitForExit()
-if ($process.ExitCode -ne 0) { exit $process.ExitCode }
+$result = Invoke-Process -FilePath "packer" -ArgumentList 'inspect', $templateFilePath
+if ($result -ne 0) { exit $result }
 
-if (Test-Path -Path "$PSScriptRoot/logs/packer.log") {
-    Remove-Item -Force -Path "$PSScriptRoot/logs/packer.log"
-}
+Remove-File -Path "$PSScriptRoot/logs/packer.log"
 
 $arguments = @(
     'build',
@@ -99,9 +158,5 @@ $arguments = @(
 if ($isDebug) { $arguments += '--debug' }
 
 Write-Output '', "==> Building template..."
-Write-Output "Executing: 'packer $($arguments -join ' ') $($variables -join ' ') $templateFilePath'", ''
-
-$process = $null
-$process = Start-Process -FilePath "packer" -ArgumentList ($arguments + $variables + @($templateFilePath)) -NoNewWindow -Wait -PassThru
-$process.WaitForExit()
-exit $process.ExitCode
+$result = Invoke-Process -FilePath "packer" -ArgumentList ($arguments + $variables + @($templateFilePath))
+exit $result
