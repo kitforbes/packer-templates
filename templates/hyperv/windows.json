@@ -54,7 +54,14 @@
       "elevated_password": "vagrant"
     }
   ],
-  "post-processors": [],
+  "post-processors": [
+    {
+      "type": "vagrant",
+      "keep_input_artifact": true,
+      "output": "{{ user `os_name` }}-{{.Provider}}.box",
+      "vagrantfile_template": "templates/vagrant/windows.Vagrantfile"
+    }
+  ],
   "variables": {
     "os_name": "",
     "iso_checksum": "",
