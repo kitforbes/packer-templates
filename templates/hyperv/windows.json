@@ -69,6 +69,46 @@
     },
     {
       "type": "powershell",
+      "script": "scripts/install_windows_updates.ps1",
+      "elevated_user": "vagrant",
+      "elevated_password": "vagrant"
+    },
+    {
+      "type": "windows-restart",
+      "restart_timeout": "1h"
+    },
+    {
+      "type": "powershell",
+      "script": "scripts/install_windows_updates.ps1",
+      "elevated_user": "vagrant",
+      "elevated_password": "vagrant"
+    },
+    {
+      "type": "windows-restart",
+      "restart_timeout": "1h"
+    },
+    {
+      "type": "powershell",
+      "script": "scripts/install_windows_updates.ps1",
+      "elevated_user": "vagrant",
+      "elevated_password": "vagrant"
+    },
+    {
+      "type": "windows-restart",
+      "restart_timeout": "1h"
+    },
+    {
+      "type": "powershell",
+      "script": "scripts/install_windows_updates.ps1",
+      "elevated_user": "vagrant",
+      "elevated_password": "vagrant"
+    },
+    {
+      "type": "windows-restart",
+      "restart_timeout": "1h"
+    },
+    {
+      "type": "powershell",
       "scripts": [
         "scripts/uninstall_chef.ps1"
       ],
