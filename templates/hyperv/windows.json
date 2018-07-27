@@ -71,7 +71,10 @@
       "type": "powershell",
       "script": "scripts/install_windows_updates.ps1",
       "elevated_user": "vagrant",
-      "elevated_password": "vagrant"
+      "elevated_password": "vagrant",
+      "environment_vars": [
+        "PACKER_NO_UPDATES={{ user `no_updates` }}"
+      ]
     },
     {
       "type": "windows-restart",
@@ -81,7 +84,10 @@
       "type": "powershell",
       "script": "scripts/install_windows_updates.ps1",
       "elevated_user": "vagrant",
-      "elevated_password": "vagrant"
+      "elevated_password": "vagrant",
+      "environment_vars": [
+        "PACKER_NO_UPDATES={{ user `no_updates` }}"
+      ]
     },
     {
       "type": "windows-restart",
@@ -91,7 +97,10 @@
       "type": "powershell",
       "script": "scripts/install_windows_updates.ps1",
       "elevated_user": "vagrant",
-      "elevated_password": "vagrant"
+      "elevated_password": "vagrant",
+      "environment_vars": [
+        "PACKER_NO_UPDATES={{ user `no_updates` }}"
+      ]
     },
     {
       "type": "windows-restart",
@@ -101,7 +110,10 @@
       "type": "powershell",
       "script": "scripts/install_windows_updates.ps1",
       "elevated_user": "vagrant",
-      "elevated_password": "vagrant"
+      "elevated_password": "vagrant",
+      "environment_vars": [
+        "PACKER_NO_UPDATES={{ user `no_updates` }}"
+      ]
     },
     {
       "type": "windows-restart",
@@ -128,6 +140,7 @@
     "os_name": "",
     "iso_checksum": "",
     "iso_checksum_type": "",
-    "iso_url": ""
+    "iso_url": "",
+    "no_updates": ""
   }
 }

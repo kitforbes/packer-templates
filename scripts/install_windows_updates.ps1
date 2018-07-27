@@ -1,5 +1,9 @@
 $ErrorActionPreference = 'Stop'
 
-Get-WindowsUpdate -WindowsUpdate -AcceptAll -Install -IgnoreReboot
+if ($Env:PACKER_NO_UPDATES) {
+    Write-Output "Skipping installation of Windows updates."
+    exit 0
+}
 
+Get-WindowsUpdate -WindowsUpdate -AcceptAll -Install -IgnoreReboot
 exit 0

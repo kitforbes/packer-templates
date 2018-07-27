@@ -13,7 +13,10 @@ param(
     [Parameter(Mandatory = $false)]
     [ValidateSet("Test")]
     [String]
-    $Action = "Test"
+    $Action = "Test",
+    [Parameter(Mandatory = $false)]
+    [Switch]
+    $NoUpdates
 )
 
 $ErrorActionPreference = "Stop"
@@ -139,6 +142,10 @@ $variables = @(
     '--var', "`"iso_checksum_type=$($template.IsoChecksumType)`"",
     '--var', "`"iso_url=$($template.IsoUrl)`""
 )
+
+if ($NoUpdates) {
+    $variables += '--var', "`"no_updates=true`""
+}
 
 $result = Invoke-Process -FilePath 'packer' -ArgumentList (@('validate', "--only=$($Action.ToLower())") + $variables + @($templateFilePath))
 if ($result -ne 0) { exit $result }
