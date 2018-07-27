@@ -1,5 +1,3 @@
-$ErrorActionPreference = 'Stop'
-
 function Get-PackerBuildName {
     [CmdletBinding()]
     [OutputType([String])]

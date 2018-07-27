@@ -1,4 +1,5 @@
 $ErrorActionPreference = 'Stop'
+$ProgressPreference = "SilentlyContinue"
 
 Write-Output "PowerShell Version information..."
 $PSVersionTable.PSVersion
