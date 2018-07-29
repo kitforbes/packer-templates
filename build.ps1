@@ -26,58 +26,10 @@ if (-not $PSScriptRoot) {
     $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
 }
 
+. $PSScriptRoot\floppy\utilities.ps1
+
 $isVerbose = [System.Management.Automation.ActionPreference]::SilentlyContinue -ne $VerbosePreference
 $isDebug = [System.Management.Automation.ActionPreference]::SilentlyContinue -ne $DebugPreference
-
-function Remove-File {
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory)]
-        [String]
-        $Path
-    )
-
-    end {
-        if (Test-Path -Path $Path) {
-            Remove-Item -Force -Path $Path
-        }
-    }
-}
-
-function Remove-Directory {
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory)]
-        [String]
-        $Path
-    )
-
-    end {
-        if (Test-Path -Path $Path) {
-            Remove-Item -Force -Path $Path -Recurse
-        }
-    }
-}
-
-function Invoke-Process {
-    [CmdletBinding()]
-    [OutputType([Int])]
-    param (
-        [Parameter(Mandatory)]
-        [String]
-        $FilePath,
-        [Parameter(Mandatory)]
-        [String[]]
-        $ArgumentList
-    )
-
-    end {
-        Write-Verbose -Message "Executing: '$FilePath $($ArgumentList -join ' ')'"
-        $process = Start-Process -FilePath $FilePath -ArgumentList $ArgumentList -NoNewWindow -PassThru -Wait
-        $process.WaitForExit()
-        return $process.ExitCode
-    }
-}
 
 $data = Get-Content -Path "$PSScriptRoot\build.data.json" | ConvertFrom-Json
 foreach ($datum in $data) {
@@ -134,7 +86,7 @@ $env:PACKER_CACHE_DIR = "$env:ALLUSERSPROFILE\.packer.d\cache"
 $env:PACKER_LOG = 1
 $env:PACKER_LOG_PATH = "$PSScriptRoot/logs/packer.log"
 
-$templateFilePath = 'templates/hyperv/windows.json'
+$templateFilePath = "templates/$($Provider.ToLower().Replace('-', ''))/windows.json"
 
 Write-Output '', "==> Validating template..."
 $variables = @(

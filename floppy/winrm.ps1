@@ -1,8 +1,10 @@
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = "SilentlyContinue"
 
-if ([environment]::OSVersion.Version.Major -ge 6) {
-    # You cannot change the network location if you are joined to a domain, so abort
+. A:\utilities.ps1
+
+if ((Get-OperatingSystemVersion).Split(".")[0] -ge 6) {
+    # Abort if domain joined.
     if (1, 3, 4, 5 -contains (Get-WmiObject win32_computersystem).DomainRole) {
         return
     }
@@ -12,20 +14,40 @@ if ([environment]::OSVersion.Version.Major -ge 6) {
     $connections = $networkListManager.GetNetworkConnections()
 
     $connections | ForEach-Object {
-        Write-Output $_.GetNetwork().GetName()"category was previously set to"$_.GetNetwork().GetCategory()
-        $_.GetNetwork().SetCategory(1)
-        Write-Output $_.GetNetwork().GetName()"changed to category"$_.GetNetwork().GetCategory()
+        $currentCategory = $_.GetNetwork().GetCategory()
+        if ($currentCategory -ne 1) {
+            $_.GetNetwork().SetCategory(1)
+            Write-Output "$($_.GetNetwork().GetName())'s category changed from '$currentCategory' to '$($_.GetNetwork().GetCategory())'"
+        }
+
+        Remove-Variable -Name "currentCategory"
     }
 }
 
+Write-Output "", "==> Enabling PSRemoting..."
 Enable-PSRemoting -Force
+
+Write-Output "==> Configuring WinRM..."
 winrm quickconfig -q
 
-winrm set winrm/config/client/auth '@{Basic="true"}'
-winrm set winrm/config/service/auth '@{Basic="true"}'
-winrm set winrm/config/service '@{AllowUnencrypted="true"}'
-winrm set winrm/config/winrs '@{MaxMemoryPerShellMB="2048"}'
-Restart-Service -Name WinRM
-netsh advfirewall firewall add rule name="WinRM-HTTP" dir=in localport=5985 protocol=TCP action=allow
+Write-Output "", "==> Configuring WinRM..."
+Update-Item -Path "WSMan:\localhost\Client\Auth\Basic" -Value "true"
+# winrm set winrm/config/client/auth '@{Basic="true"}'
+Update-Item -Path "WSMan:\localhost\Service\Auth\Basic" -Value "true"
+# winrm set winrm/config/service/auth '@{Basic="true"}'
+Update-Item -Path "WSMan:\localhost\Service\AllowUnencrypted" -Value "true"
+# winrm set winrm/config/service '@{AllowUnencrypted="true"}'
+Update-Item -Path "WSMan:\localhost\Shell\MaxMemoryPerShellMB" -Value "2048"
+# winrm set winrm/config/winrs '@{MaxMemoryPerShellMB="2048"}'
 
-Get-ScheduledTask -TaskName ServerManager | Disable-ScheduledTask
+Write-Output "", "==> Restarting WinRM..."
+Restart-Service -Name WinRM
+
+Write-Output "==> Add WinRM Firewall rule..."
+New-NetFirewallRule -DisplayName "WinRM-HTTP" -Direction Inbound -LocalPort 5985 -Protocol TCP -Action Allow | Out-Null
+# netsh advfirewall firewall add rule name="WinRM-HTTP" dir=in localport=5985 protocol=TCP action=allow
+
+Write-Output "==> Disable Server Manager task..."
+Get-ScheduledTask -TaskName ServerManager | Disable-ScheduledTask | Out-Null
+
+exit 0

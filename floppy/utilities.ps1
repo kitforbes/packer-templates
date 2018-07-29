@@ -114,6 +114,29 @@ function Remove-Directory {
     }
 }
 
+function Update-Item {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)]
+        [String]
+        $Path,
+        [Parameter(Mandatory)]
+        [String]
+        $Value
+    )
+
+    end {
+        $currentValue = (Get-Item -Path $Path).Value
+        if ($currentValue -ne $Value) {
+            Set-Item -Path $Path -Value $Value
+            Write-Output "'$Path' changed from '$currentValue' to '$Value'"
+        }
+        else {
+            Write-Output "'$Path' unchanged from '$currentValue'"
+        }
+    }
+}
+
 function Invoke-Process {
     [CmdletBinding()]
     [OutputType([Int])]
@@ -128,8 +151,17 @@ function Invoke-Process {
 
     end {
         Write-Verbose -Message "Executing: '$FilePath $($ArgumentList -join ' ')'"
+        $startTime = Get-Date
         $process = Start-Process -FilePath $FilePath -ArgumentList $ArgumentList -NoNewWindow -PassThru -Wait
         $process.WaitForExit()
+        $duration = (Get-Date).Subtract($startTime)
+        if ($duration.Minutes -le 0) {
+            Write-Verbose -Message "Duration: $($duration.Seconds) second(s)"
+        }
+        else {
+            Write-Verbose -Message "Duration: $($duration.Minutes) minute(s)"
+        }
+
         return $process.ExitCode
     }
 }
