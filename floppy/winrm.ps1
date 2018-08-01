@@ -1,5 +1,6 @@
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = "SilentlyContinue"
+if ($Env:PACKER_VERBOSE) { $VerbosePreference = "Continue" }
 
 . A:\utilities.ps1
 

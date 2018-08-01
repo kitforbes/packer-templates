@@ -41,6 +41,9 @@
       "type": "windows-shell",
       "inline": [
         "cmd.exe /c powershell.exe -File C:\\Windows\\Temp\\install_powershell.ps1"
+      ],
+      "environment_vars": [
+        "PACKER_VERBOSE={{ user `verbose` }}"
       ]
     },
     {
@@ -51,7 +54,10 @@
       "type": "powershell",
       "script": "scripts/verify.ps1",
       "elevated_user": "vagrant",
-      "elevated_password": "vagrant"
+      "elevated_password": "vagrant",
+      "environment_vars": [
+        "PACKER_VERBOSE={{ user `verbose` }}"
+      ]
     },
     {
       "type": "chef-solo",
@@ -73,7 +79,8 @@
       "elevated_user": "vagrant",
       "elevated_password": "vagrant",
       "environment_vars": [
-        "PACKER_NO_UPDATES={{ user `no_updates` }}"
+        "PACKER_NO_UPDATES={{ user `no_updates` }}",
+        "PACKER_VERBOSE={{ user `verbose` }}"
       ]
     },
     {
@@ -86,7 +93,8 @@
       "elevated_user": "vagrant",
       "elevated_password": "vagrant",
       "environment_vars": [
-        "PACKER_NO_UPDATES={{ user `no_updates` }}"
+        "PACKER_NO_UPDATES={{ user `no_updates` }}",
+        "PACKER_VERBOSE={{ user `verbose` }}"
       ]
     },
     {
@@ -99,7 +107,8 @@
       "elevated_user": "vagrant",
       "elevated_password": "vagrant",
       "environment_vars": [
-        "PACKER_NO_UPDATES={{ user `no_updates` }}"
+        "PACKER_NO_UPDATES={{ user `no_updates` }}",
+        "PACKER_VERBOSE={{ user `verbose` }}"
       ]
     },
     {
@@ -112,7 +121,8 @@
       "elevated_user": "vagrant",
       "elevated_password": "vagrant",
       "environment_vars": [
-        "PACKER_NO_UPDATES={{ user `no_updates` }}"
+        "PACKER_NO_UPDATES={{ user `no_updates` }}",
+        "PACKER_VERBOSE={{ user `verbose` }}"
       ]
     },
     {
@@ -125,7 +135,10 @@
         "scripts/uninstall_chef.ps1"
       ],
       "elevated_user": "vagrant",
-      "elevated_password": "vagrant"
+      "elevated_password": "vagrant",
+      "environment_vars": [
+        "PACKER_VERBOSE={{ user `verbose` }}"
+      ]
     }
   ],
   "post-processors": [
@@ -142,6 +155,7 @@
     "iso_checksum_type": "",
     "iso_url": "",
     "no_updates": "",
-    "output_dir": "output"
+    "output_dir": "output",
+    "verbose": ""
   }
 }

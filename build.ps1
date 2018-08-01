@@ -22,7 +22,7 @@ param(
 $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
 
-. $PSScriptRoot\floppy\utilities.ps1
+. $PSScriptRoot/floppy/utilities.ps1
 
 if (-not $PSScriptRoot) {
     $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
@@ -31,7 +31,7 @@ if (-not $PSScriptRoot) {
 $isVerbose = [System.Management.Automation.ActionPreference]::SilentlyContinue -ne $VerbosePreference
 $isDebug = [System.Management.Automation.ActionPreference]::SilentlyContinue -ne $DebugPreference
 
-$data = Get-Content -Path "$PSScriptRoot\build.data.json" | ConvertFrom-Json
+$data = Get-Content -Path "$PSScriptRoot/build.data.json" | ConvertFrom-Json
 foreach ($datum in $data) {
     if ($datum.name -eq $Name) {
         $template = [PSCustomObject] @{
@@ -72,23 +72,23 @@ if (-not (Test-Path -Path $outputDirectory)) {
 
 Remove-File -Path "$PSScriptRoot/logs/packer.log"
 Write-Output '', "==> Removing vendored cookbooks..."
-Remove-Directory -Path "$PSScriptRoot\vendor\cookbooks"
+Remove-Directory -Path "$PSScriptRoot/vendor/cookbooks"
 
 $cookbooks = @('provision')
 foreach ($cookbook in $cookbooks) {
     Write-Output '', "==> Testing '$cookbook' cookbook..."
-    $result = Invoke-Process -FilePath 'chef' -ArgumentList 'exec', 'rake', '--rakefile', "$PSScriptRoot\cookbooks\$cookbook\Rakefile"
+    $result = Invoke-Process -FilePath 'chef' -ArgumentList 'exec', 'rake', '--rakefile', "$PSScriptRoot/cookbooks/$cookbook/Rakefile"
     if ($result -ne 0) { exit $result }
 }
 
 foreach ($cookbook in $cookbooks) {
     Write-Output '', "==> Acquiring dependencies for '$cookbook' cookbook..."
-    $result = Invoke-Process -FilePath 'chef' -ArgumentList 'exec', 'berks', 'vendor', "$PSScriptRoot\vendor\cookbooks", "--berksfile=$PSScriptRoot\cookbooks\$cookbook\Berksfile", '--no-delete'
+    $result = Invoke-Process -FilePath 'chef' -ArgumentList 'exec', 'berks', 'vendor', "$PSScriptRoot/vendor/cookbooks", "--berksfile=$PSScriptRoot/cookbooks/$cookbook/Berksfile", '--no-delete'
     if ($result -ne 0) { exit $result}
 }
 
 $env:CHECKPOINT_DISABLE = 1
-$env:PACKER_CACHE_DIR = "$env:ALLUSERSPROFILE\.packer.d\cache"
+$env:PACKER_CACHE_DIR = "$env:ALLUSERSPROFILE/.packer.d/cache"
 $env:PACKER_LOG = 1
 $env:PACKER_LOG_PATH = "$PSScriptRoot/logs/packer.log"
 
@@ -104,6 +104,10 @@ $variables = @(
 
 if ($NoUpdates) {
     $variables += '--var', "`"no_updates=true`""
+}
+
+if ($isVerbose) {
+    $variables += '--var', "`"verbose=true`""
 }
 
 $result = Invoke-Process -FilePath 'packer' -ArgumentList (@('validate', "--only=$($Action.ToLower())") + $variables + @($templateFilePath))
