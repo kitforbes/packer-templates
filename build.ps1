@@ -22,11 +22,11 @@ param(
 $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
 
+. $PSScriptRoot\floppy\utilities.ps1
+
 if (-not $PSScriptRoot) {
     $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
 }
-
-. $PSScriptRoot\floppy\utilities.ps1
 
 $isVerbose = [System.Management.Automation.ActionPreference]::SilentlyContinue -ne $VerbosePreference
 $isDebug = [System.Management.Automation.ActionPreference]::SilentlyContinue -ne $DebugPreference
@@ -64,6 +64,12 @@ if ($isVerbose) {
     $template
 }
 
+$outputDirectory = "$PSScriptRoot/output"
+if (-not (Test-Path -Path $outputDirectory)) {
+    Write-Output '', "==> Creating output directory..."
+    New-Item -Path $outputDirectory -ItemType Directory
+}
+
 Remove-File -Path "$PSScriptRoot/logs/packer.log"
 Write-Output '', "==> Removing vendored cookbooks..."
 Remove-Directory -Path "$PSScriptRoot\vendor\cookbooks"
@@ -76,7 +82,7 @@ foreach ($cookbook in $cookbooks) {
 }
 
 foreach ($cookbook in $cookbooks) {
-    Write-Output "==> Acquiring dependencies for '$cookbook' cookbook..."
+    Write-Output '', "==> Acquiring dependencies for '$cookbook' cookbook..."
     $result = Invoke-Process -FilePath 'chef' -ArgumentList 'exec', 'berks', 'vendor', "$PSScriptRoot\vendor\cookbooks", "--berksfile=$PSScriptRoot\cookbooks\$cookbook\Berksfile", '--no-delete'
     if ($result -ne 0) { exit $result}
 }
@@ -119,4 +125,28 @@ if ($isDebug) { $arguments += '--debug' }
 
 Write-Output '', "==> Building template..."
 $result = Invoke-Process -FilePath "packer" -ArgumentList ($arguments + $variables + @($templateFilePath))
-exit $result
+if ($result -ne 0) { exit $result }
+
+Write-Output '', "==> Displaying artifacts..."
+Get-ChildItem -Path $outputDirectory -Include * -Exclude .gitkeep | ForEach-Object {
+    if ($_.PSIsContainer) {
+        $type = "Directory"
+        $size = (Get-ChildItem -Path $_.FullName -Recurse | Measure-Object -Property Length -Sum).Sum
+    }
+    else {
+        $type = "File"
+        $size = $_.Length
+    }
+
+    return [PSCustomObject] @{
+        Type     = $type
+        Size     = $size
+        Artifact = "output/$($_.Name)"
+    }
+} | Format-Table -Property @(
+    "Type",
+    @{Name = "Size (MB)"; Expression = { "{0:N0}" -f ($_.Size / 1MB) }; Align = "Right"},
+    "Artifact"
+)
+
+exit 0
