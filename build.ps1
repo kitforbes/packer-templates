@@ -31,6 +31,15 @@ if (-not $PSScriptRoot) {
 $isVerbose = [System.Management.Automation.ActionPreference]::SilentlyContinue -ne $VerbosePreference
 $isDebug = [System.Management.Automation.ActionPreference]::SilentlyContinue -ne $DebugPreference
 
+if ($isVerbose) {
+    $parameters = [PSCustomObject] @{}
+    foreach ($parameter in $PSBoundParameters.GetEnumerator()) {
+        $parameters | Add-Member -MemberType NoteProperty -Name $parameter.Key -Value $parameter.Value
+    }
+
+    ($parameters | Format-List | Out-String).Trim()
+}
+
 $data = Get-Content -Path "$PSScriptRoot/build.data.json" | ConvertFrom-Json
 foreach ($datum in $data) {
     if ($datum.name -eq $Name) {
