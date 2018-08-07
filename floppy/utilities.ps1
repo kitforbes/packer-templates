@@ -59,7 +59,12 @@ function Get-OperatingSystemVersion {
             return $lookupTable[$version]
         }
         else {
-            return (Get-CimInstance -ClassName Win32_OperatingSystem).Version
+            if (Test-Command -Name Get-CimInstance) {
+                return (Get-CimInstance -ClassName Win32_OperatingSystem).Version
+            }
+            else {
+                throw
+            }
         }
     }
 }
@@ -146,20 +151,32 @@ function Invoke-Process {
         $FilePath,
         [Parameter(Mandatory)]
         [String[]]
-        $ArgumentList
+        $ArgumentList,
+        [Parameter(Mandatory = $false)]
+        [Switch]
+        $Quiet
     )
 
     end {
         Write-Verbose -Message "Executing: '$FilePath $($ArgumentList -join ' ')'"
         $startTime = Get-Date
-        $process = Start-Process -FilePath $FilePath -ArgumentList $ArgumentList -NoNewWindow -PassThru -Wait
-        $process.WaitForExit()
-        $duration = (Get-Date).Subtract($startTime)
-        if ($duration.Minutes -le 0) {
-            Write-Verbose -Message "Duration: $($duration.Seconds) second(s)"
+        if ($Quiet) {
+            Remove-File -Path "C:\Windows\Temp\invoke-process-out.txt"
+            Remove-File -Path "C:\Windows\Temp\invoke-process-err.txt"
+            $process = Start-Process -FilePath $FilePath -ArgumentList $ArgumentList -NoNewWindow -PassThru -Wait -RedirectStandardOutput "C:\Windows\Temp\invoke-process-out.txt" -RedirectStandardError "C:\Windows\Temp\invoke-process-err.txt"
         }
         else {
-            Write-Verbose -Message "Duration: $($duration.Minutes) minute(s)"
+            $process = Start-Process -FilePath $FilePath -ArgumentList $ArgumentList -NoNewWindow -PassThru -Wait
+        }
+
+        $process.WaitForExit()
+        $endTime = Get-Date
+        $duration = ($endTime).Subtract($startTime)
+        if ($duration.Minutes -le 0) {
+            Write-Verbose -Message "Duration: $("{0:N3}" -f ($duration.TotalSeconds)) second(s)"
+        }
+        else {
+            Write-Verbose -Message "Duration: $("{0:N0}" -f ($duration.TotalMinutes)) minute(s)"
         }
 
         return $process.ExitCode
@@ -168,7 +185,7 @@ function Invoke-Process {
 
 function Test-Command {
     [CmdletBinding()]
-    [OutputType([Int])]
+    [OutputType([Boolean])]
     param (
         [Parameter(Mandatory)]
         [String]

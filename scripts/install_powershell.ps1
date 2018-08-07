@@ -19,7 +19,7 @@ function Stop-WindowsUpdateService () {
 }
 
 function Get-PowerShell ($Source, $Destination, $Checksum) {
-    Write-Output "Downloading installer..."
+    Write-Output "", "==> Downloading installer..."
     $startTime = Get-Date
     (New-Object System.Net.WebClient).DownloadFile($Source, $Destination)
     Write-Output "Time taken: $((Get-Date).Subtract($startTime).Seconds) second(s)"
@@ -48,7 +48,7 @@ function Get-PowerShell ($Source, $Destination, $Checksum) {
 }
 
 function Expand-MsuFile ($Package) {
-    Write-Output "Extracting '$Package'..."
+    Write-Output "", "==> Extracting '$Package'..."
     $result = Invoke-Process -FilePath "$env:WinDir\System32\wusa.exe" -ArgumentList "$env:WinDir\Temp\$Package", "/extract:$env:WinDir\Temp", "/log:$env:WinDir\Temp\$($Package.Replace(".msu", ".log"))"
 
     if ($result -ne 0) {
@@ -60,7 +60,7 @@ function Expand-MsuFile ($Package) {
 }
 
 function Install-CabFile ($Package) {
-    Write-Output "Installing '$Package'..."
+    Write-Output "", "==> Installing '$Package'..."
     $result = Invoke-Process -FilePath "$env:WinDir\System32\Dism.exe" -ArgumentList '/online', '/add-package', "/PackagePath:$env:WinDir\Temp\$Package", '/Quiet', '/NoRestart'
     if (0, 3010 -notcontains $result) {
         Get-Content -Path "$env:WinDir\Logs\DISM\dism.log"

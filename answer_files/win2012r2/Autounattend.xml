@@ -145,8 +145,19 @@
       </AutoLogon>
       <FirstLogonCommands>
         <SynchronousCommand wcm:action="add">
-          <CommandLine>cmd.exe /c C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -File A:\winrm.ps1 >> A:\winrm.log</CommandLine>
+          <CommandLine>cmd.exe /c powershell -Command "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force"</CommandLine>
+          <Description>Set PowerShell execution policy</Description>
           <Order>1</Order>
+        </SynchronousCommand>
+        <SynchronousCommand wcm:action="add">
+          <CommandLine>C:\Windows\SysWOW64\cmd.exe /c powershell -Command "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force"</CommandLine>
+          <Description>Set PowerShell execution policy</Description>
+          <Order>2</Order>
+        </SynchronousCommand>
+        <SynchronousCommand wcm:action="add">
+          <CommandLine>cmd.exe /c C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -File A:\winrm.ps1 >> A:\winrm.log</CommandLine>
+          <Description>Configure WinRM connectivity</Description>
+          <Order>3</Order>
         </SynchronousCommand>
       </FirstLogonCommands>
     </component>

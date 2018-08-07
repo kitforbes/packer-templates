@@ -3,32 +3,28 @@
     {
       "name": "test",
       "type": "hyperv-iso",
-      "output_directory": "{{ user `output_dir` }}/{{ user `os_name` }}-hyperv/",
-      "vm_name": "{{ user `os_name` }}",
-      "iso_url": "{{ user `iso_url` }}",
-      "iso_checksum": "{{ user `iso_checksum` }}",
-      "iso_checksum_type": "{{ user `iso_checksum_type` }}",
+      "http_directory": "scripts",
+      "output_directory": "{{ user `output_dir` }}/{{ user `os_name` }}-2-hyperv/",
+      "vm_name": "{{ user `os_name` }}-2",
+      "iso_url": "{{ user `output_dir` }}/{{ user `os_name` }}-1-hyperv/Virtual Hard Disks/{{ user `os_name` }}-1.vhdx",
+      "iso_checksum_type": "none",
       "communicator": "winrm",
       "winrm_username": "vagrant",
       "winrm_password": "vagrant",
       "winrm_timeout": "12h",
-      "shutdown_command": "A:/PackerShutdown.bat",
+      "shutdown_command": "shutdown /s /t 10 /f /d p:4:1 /c \"Packer Shutdown\"",
       "shutdown_timeout": "1h",
       "floppy_files": [
-        "answer_files/{{ user `os_name` }}/Autounattend.xml",
-        "floppy/utilities.ps1",
-        "floppy/winrm.ps1",
-        "floppy/PackerShutdown.bat",
-        "floppy/postunattend.xml"
+        "floppy/utilities.ps1"
       ],
       "cpu": 1,
       "disk_size": 81920,
       "ram_size": 4096,
+      "differencing_disk": true,
+      "skip_export": true,
       "generation": 1,
       "boot_wait": "0s",
-      "boot_command": [
-        "a<wait>a<wait>a"
-      ]
+      "boot_command": []
     }
   ],
   "provisioners": [
@@ -40,6 +36,7 @@
     {
       "type": "windows-shell",
       "inline": [
+        "@echo off",
         "cmd.exe /c powershell.exe -File C:\\Windows\\Temp\\install_powershell.ps1"
       ],
       "environment_vars": [
@@ -51,26 +48,21 @@
       "restart_timeout": "1h"
     },
     {
+      "type": "windows-shell",
+      "inline": [
+        "@echo off",
+        "echo ==^> PowerShell Version information...",
+        "powershell -Command \"$PSVersionTable.PSVersion; $psVersion = $PSVersionTable.PSVersion.ToString().Split('.')[0..1] -Join '.'; if ($psVersion -ne '5.1') { exit 1 } else { exit 0 }\"",
+        "exit /B %ERRORLEVEL%"
+      ]
+    },
+    {
       "type": "powershell",
-      "script": "scripts/verify.ps1",
+      "script": "scripts/update_powershell_environment.ps1",
       "elevated_user": "vagrant",
       "elevated_password": "vagrant",
       "environment_vars": [
         "PACKER_VERBOSE={{ user `verbose` }}"
-      ]
-    },
-    {
-      "type": "chef-solo",
-      "cookbook_paths": [
-        "vendor/cookbooks"
-      ],
-      "version": "",
-      "guest_os_type": "windows",
-      "prevent_sudo": true,
-      "run_list": [
-        "provision::chocolatey",
-        "provision::powershell",
-        "provision::powershell_modules"
       ]
     },
     {
@@ -79,8 +71,8 @@
       "elevated_user": "vagrant",
       "elevated_password": "vagrant",
       "environment_vars": [
-        "PACKER_NO_UPDATES={{ user `no_updates` }}",
-        "PACKER_VERBOSE={{ user `verbose` }}"
+        "PACKER_VERBOSE={{ user `verbose` }}",
+        "PACKER_NO_UPDATES={{ user `no_updates` }}"
       ]
     },
     {
@@ -93,8 +85,8 @@
       "elevated_user": "vagrant",
       "elevated_password": "vagrant",
       "environment_vars": [
-        "PACKER_NO_UPDATES={{ user `no_updates` }}",
-        "PACKER_VERBOSE={{ user `verbose` }}"
+        "PACKER_VERBOSE={{ user `verbose` }}",
+        "PACKER_NO_UPDATES={{ user `no_updates` }}"
       ]
     },
     {
@@ -107,8 +99,8 @@
       "elevated_user": "vagrant",
       "elevated_password": "vagrant",
       "environment_vars": [
-        "PACKER_NO_UPDATES={{ user `no_updates` }}",
-        "PACKER_VERBOSE={{ user `verbose` }}"
+        "PACKER_VERBOSE={{ user `verbose` }}",
+        "PACKER_NO_UPDATES={{ user `no_updates` }}"
       ]
     },
     {
@@ -121,34 +113,16 @@
       "elevated_user": "vagrant",
       "elevated_password": "vagrant",
       "environment_vars": [
-        "PACKER_NO_UPDATES={{ user `no_updates` }}",
-        "PACKER_VERBOSE={{ user `verbose` }}"
+        "PACKER_VERBOSE={{ user `verbose` }}",
+        "PACKER_NO_UPDATES={{ user `no_updates` }}"
       ]
     },
     {
       "type": "windows-restart",
       "restart_timeout": "1h"
-    },
-    {
-      "type": "powershell",
-      "scripts": [
-        "scripts/uninstall_chef.ps1"
-      ],
-      "elevated_user": "vagrant",
-      "elevated_password": "vagrant",
-      "environment_vars": [
-        "PACKER_VERBOSE={{ user `verbose` }}"
-      ]
     }
   ],
-  "post-processors": [
-    {
-      "type": "vagrant",
-      "keep_input_artifact": true,
-      "output": "{{ user `output_dir` }}/{{ user `os_name` }}-{{ .Provider }}.box",
-      "vagrantfile_template": "templates/vagrant/windows.Vagrantfile"
-    }
-  ],
+  "post-processors": [],
   "variables": {
     "os_name": "",
     "iso_checksum": "",

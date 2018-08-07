@@ -14,6 +14,7 @@ if ((Get-OperatingSystemVersion).Split(".")[0] -ge 6) {
     $networkListManager = [Activator]::CreateInstance([Type]::GetTypeFromCLSID([Guid]"{DCB00C01-570F-4A9B-8D69-199FDBA5723B}"))
     $connections = $networkListManager.GetNetworkConnections()
 
+    # Set network connections to private
     $connections | ForEach-Object {
         $currentCategory = $_.GetNetwork().GetCategory()
         if ($currentCategory -ne 1) {
@@ -25,11 +26,10 @@ if ((Get-OperatingSystemVersion).Split(".")[0] -ge 6) {
     }
 }
 
-Write-Output "", "==> Enabling PSRemoting..."
+Write-Output "", "==> Configuring remote access..."
 Enable-PSRemoting -Force
-
-Write-Output "==> Configuring WinRM..."
-winrm quickconfig -q
+Set-WSManQuickConfig -Force
+# winrm quickconfig -q
 
 Write-Output "", "==> Configuring WinRM..."
 Update-Item -Path "WSMan:\localhost\Client\Auth\Basic" -Value "true"
@@ -40,6 +40,7 @@ Update-Item -Path "WSMan:\localhost\Service\AllowUnencrypted" -Value "true"
 # winrm set winrm/config/service '@{AllowUnencrypted="true"}'
 Update-Item -Path "WSMan:\localhost\Shell\MaxMemoryPerShellMB" -Value "2048"
 # winrm set winrm/config/winrs '@{MaxMemoryPerShellMB="2048"}'
+Update-Item -Path "WSMan:\localhost\MaxTimeoutms" -Value "1800000"
 
 Write-Output "", "==> Restarting WinRM..."
 Restart-Service -Name WinRM

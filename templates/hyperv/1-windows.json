@@ -1,0 +1,53 @@
+{
+  "builders": [
+    {
+      "name": "test",
+      "type": "hyperv-iso",
+      "output_directory": "{{ user `output_dir` }}/{{ user `os_name` }}-1-hyperv/",
+      "vm_name": "{{ user `os_name` }}-1",
+      "iso_url": "{{ user `iso_url` }}",
+      "iso_checksum": "{{ user `iso_checksum` }}",
+      "iso_checksum_type": "{{ user `iso_checksum_type` }}",
+      "communicator": "winrm",
+      "winrm_username": "vagrant",
+      "winrm_password": "vagrant",
+      "winrm_timeout": "12h",
+      "shutdown_command": "shutdown /s /t 10 /f /d p:4:1 /c \"Packer Shutdown\"",
+      "shutdown_timeout": "1h",
+      "floppy_files": [
+        "answer_files/{{ user `os_name` }}/Autounattend.xml",
+        "floppy/utilities.ps1",
+        "floppy/winrm.ps1"
+      ],
+      "cpu": 1,
+      "disk_size": 81920,
+      "ram_size": 4096,
+      "differencing_disk": false,
+      "skip_export": true,
+      "generation": 1,
+      "boot_wait": "0s",
+      "boot_command": [
+        "a<wait>a<wait>a"
+      ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "windows-shell",
+      "inline": [
+        "@echo off",
+        "powershell -Command \"Get-ChildItem -Path A:\\*.log | Get-Content\""
+      ]
+    }
+  ],
+  "post-processors": [],
+  "variables": {
+    "os_name": "",
+    "iso_checksum": "",
+    "iso_checksum_type": "",
+    "iso_url": "",
+    "no_updates": "",
+    "output_dir": "output",
+    "verbose": ""
+  }
+}

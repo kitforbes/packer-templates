@@ -15,6 +15,10 @@ param(
     [String]
     $Action = "Test",
     [Parameter(Mandatory = $false)]
+    [ValidateSet(1, 2)]
+    [Int]
+    $Stage = 1,
+    [Parameter(Mandatory = $false)]
     [Switch]
     $NoUpdates
 )
@@ -101,7 +105,7 @@ $env:PACKER_CACHE_DIR = "$env:ALLUSERSPROFILE/.packer.d/cache"
 $env:PACKER_LOG = 1
 $env:PACKER_LOG_PATH = "$PSScriptRoot/logs/packer.log"
 
-$templateFilePath = "templates/$($Provider.ToLower().Replace('-', ''))/windows.json"
+$templateFilePath = "templates/$($Provider.ToLower().Replace('-', ''))/$Stage-windows.json"
 
 Write-Output '', "==> Validating template..."
 $variables = @(
