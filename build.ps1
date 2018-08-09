@@ -77,6 +77,12 @@ if ($isVerbose) {
     $template
 }
 
+if ($Provider -eq 'Hyper-V') {
+    if ((Get-WindowsOptionalFeature -FeatureName Microsoft-Hyper-V -Online).State -ne "Enabled") {
+        throw "You need to install and enable Hyper-V to run the Hyper-V Builder."
+    }
+}
+
 $outputDirectory = "$PSScriptRoot/output"
 if (-not (Test-Path -Path $outputDirectory)) {
     Write-Output '', "==> Creating output directory..."
