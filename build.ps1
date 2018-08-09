@@ -87,17 +87,20 @@ Remove-File -Path "$PSScriptRoot/logs/packer.log"
 Write-Output '', "==> Removing vendored cookbooks..."
 Remove-Directory -Path "$PSScriptRoot/vendor/cookbooks"
 
-$cookbooks = @('provision')
-foreach ($cookbook in $cookbooks) {
-    Write-Output '', "==> Testing '$cookbook' cookbook..."
-    $result = Invoke-Process -FilePath 'chef' -ArgumentList 'exec', 'rake', '--rakefile', "$PSScriptRoot/cookbooks/$cookbook/Rakefile"
-    if ($result -ne 0) { exit $result }
-}
+$useChef = $Stage -eq 3
+if ($useChef) {
+    $cookbooks = @('provision')
+    foreach ($cookbook in $cookbooks) {
+        Write-Output '', "==> Testing '$cookbook' cookbook..."
+        $result = Invoke-Process -FilePath 'chef' -ArgumentList 'exec', 'rake', '--rakefile', "$PSScriptRoot/cookbooks/$cookbook/Rakefile"
+        if ($result -ne 0) { exit $result }
+    }
 
-foreach ($cookbook in $cookbooks) {
-    Write-Output '', "==> Acquiring dependencies for '$cookbook' cookbook..."
-    $result = Invoke-Process -FilePath 'chef' -ArgumentList 'exec', 'berks', 'vendor', "$PSScriptRoot/vendor/cookbooks", "--berksfile=$PSScriptRoot/cookbooks/$cookbook/Berksfile", '--no-delete'
-    if ($result -ne 0) { exit $result}
+    foreach ($cookbook in $cookbooks) {
+        Write-Output '', "==> Acquiring dependencies for '$cookbook' cookbook..."
+        $result = Invoke-Process -FilePath 'chef' -ArgumentList 'exec', 'berks', 'vendor', "$PSScriptRoot/vendor/cookbooks", "--berksfile=$PSScriptRoot/cookbooks/$cookbook/Berksfile", '--no-delete'
+        if ($result -ne 0) { exit $result}
+    }
 }
 
 $env:CHECKPOINT_DISABLE = 1
