@@ -15,7 +15,7 @@ param(
     [String]
     $Action = "Test",
     [Parameter(Mandatory = $false)]
-    [ValidateSet(1, 2)]
+    [ValidateSet(1, 2, 3)]
     [Int]
     $Stage = 1,
     [Parameter(Mandatory = $false)]
