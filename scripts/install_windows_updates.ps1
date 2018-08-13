@@ -3,9 +3,10 @@ $ProgressPreference = "SilentlyContinue"
 if ($Env:PACKER_VERBOSE) { $VerbosePreference = "Continue" }
 
 if ($Env:PACKER_NO_UPDATES) {
-    Write-Output "Skipping installation of Windows updates."
-    exit 0
+    Write-Output -InputObject "Skipping installation of Windows updates."
+}
+else {
+    Get-WindowsUpdate -WindowsUpdate -AcceptAll -Install -IgnoreReboot
 }
 
-Get-WindowsUpdate -WindowsUpdate -AcceptAll -Install -IgnoreReboot
 exit 0

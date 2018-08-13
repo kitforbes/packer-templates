@@ -19,18 +19,18 @@ function Stop-WindowsUpdateService () {
 }
 
 function Get-PowerShell ($Source, $Destination, $Checksum) {
-    Write-Output "", "==> Downloading installer..."
+    Write-Output -InputObject "", "==> Downloading installer..."
     $startTime = Get-Date
     (New-Object System.Net.WebClient).DownloadFile($Source, $Destination)
-    Write-Output "Time taken: $((Get-Date).Subtract($startTime).Seconds) second(s)"
+    Write-Output -InputObject "Time taken: $((Get-Date).Subtract($startTime).Seconds) second(s)"
 
     if (-not (Test-Path -Path $Destination)) {
-        Write-Output "Downloaded file not found."
+        Write-Output -InputObject "Downloaded file not found."
         exit 1
     }
 
     if ((Get-FileHash -Path $Destination -Algorithm SHA256).Hash.ToLower() -ne $Checksum) {
-        Write-Output "Checksum does not match."
+        Write-Output -InputObject "Checksum does not match."
         exit 1
     }
 
@@ -48,23 +48,23 @@ function Get-PowerShell ($Source, $Destination, $Checksum) {
 }
 
 function Expand-MsuFile ($Package) {
-    Write-Output "", "==> Extracting '$Package'..."
+    Write-Output -InputObject "", "==> Extracting '$Package'..."
     $result = Invoke-Process -FilePath "$env:SystemRoot\System32\wusa.exe" -ArgumentList "$env:SystemRoot\Temp\$Package", "/extract:$env:SystemRoot\Temp", "/log:$env:SystemRoot\Temp\$($Package.Replace(".msu", ".log"))"
 
     if ($result -ne 0) {
         Get-Content -Path "$env:SystemRoot\Temp\$($Package.Replace(".msu", ".log"))"
         Get-ChildItem -Path "$env:SystemRoot\Temp"
-        Write-Output "Wusa Error: $($result)"
+        Write-Output -InputObject "Wusa Error: $($result)"
         exit $result
     }
 }
 
 function Install-CabFile ($Package) {
-    Write-Output "", "==> Installing '$Package'..."
+    Write-Output -InputObject "", "==> Installing '$Package'..."
     $result = Invoke-Process -FilePath "$env:SystemRoot\System32\Dism.exe" -ArgumentList '/online', '/add-package', "/PackagePath:$env:SystemRoot\Temp\$Package", '/Quiet', '/NoRestart'
     if (0, 3010 -notcontains $result) {
         Get-Content -Path "$env:SystemRoot\Logs\DISM\dism.log"
-        Write-Output "", "Dism Error: $($result)"
+        Write-Output -InputObject "", "Dism Error: $($result)"
         exit $result
     }
 }
@@ -72,8 +72,8 @@ function Install-CabFile ($Package) {
 $powershellVersion = (Get-PowerShellVersion).Split('.')[0..1] -join '.'
 $osVersion = (Get-OperatingSystemVersion).Split('.')[0..1] -join '.'
 
-Write-Output "Operating System Version: $osVersion"
-Write-Output "Current PowerShell Version: $powershellVersion"
+Write-Output -InputObject "Operating System Version: $osVersion"
+Write-Output -InputObject "Current PowerShell Version: $powershellVersion"
 switch ($osVersion) {
     '6.1' {
         if ($env:PROCESSOR_ARCHITECTURE -eq 'x86') {
@@ -115,7 +115,7 @@ switch ($osVersion) {
 }
 
 if ($PSVersionTable.PSVersion.Major -ge 5) {
-    Write-Output "Not installing PowerShell as $powershellVersion is already installed."
+    Write-Output -InputObject "Not installing PowerShell as $powershellVersion is already installed."
     exit 0
 }
 

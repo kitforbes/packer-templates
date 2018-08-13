@@ -19,19 +19,19 @@ if ((Get-OperatingSystemVersion).Split(".")[0] -ge 6) {
         $currentCategory = $_.GetNetwork().GetCategory()
         if ($currentCategory -ne 1) {
             $_.GetNetwork().SetCategory(1)
-            Write-Output "$($_.GetNetwork().GetName())'s category changed from '$currentCategory' to '$($_.GetNetwork().GetCategory())'"
+            Write-Output -InputObject "$($_.GetNetwork().GetName())'s category changed from '$currentCategory' to '$($_.GetNetwork().GetCategory())'"
         }
 
         Remove-Variable -Name "currentCategory"
     }
 }
 
-Write-Output "", "==> Configuring remote access..."
+Write-Output -InputObject "", "==> Configuring remote access..."
 Enable-PSRemoting -Force
 Set-WSManQuickConfig -Force
 # winrm quickconfig -q
 
-Write-Output "", "==> Configuring WinRM..."
+Write-Output -InputObject "", "==> Configuring WinRM..."
 Update-Item -Path "WSMan:\localhost\Client\Auth\Basic" -Value "true"
 # winrm set winrm/config/client/auth '@{Basic="true"}'
 Update-Item -Path "WSMan:\localhost\Service\Auth\Basic" -Value "true"
@@ -42,14 +42,14 @@ Update-Item -Path "WSMan:\localhost\Shell\MaxMemoryPerShellMB" -Value "2048"
 # winrm set winrm/config/winrs '@{MaxMemoryPerShellMB="2048"}'
 Update-Item -Path "WSMan:\localhost\MaxTimeoutms" -Value "1800000"
 
-Write-Output "", "==> Restarting WinRM..."
+Write-Output -InputObject "", "==> Restarting WinRM..."
 Restart-Service -Name WinRM
 
-Write-Output "==> Add WinRM Firewall rule..."
+Write-Output -InputObject "==> Add WinRM Firewall rule..."
 New-NetFirewallRule -DisplayName "WinRM-HTTP" -Direction Inbound -LocalPort 5985 -Protocol TCP -Action Allow | Out-Null
 # netsh advfirewall firewall add rule name="WinRM-HTTP" dir=in localport=5985 protocol=TCP action=allow
 
-Write-Output "==> Disable Server Manager task..."
+Write-Output -InputObject "==> Disable Server Manager task..."
 Get-ScheduledTask -TaskName ServerManager | Disable-ScheduledTask | Out-Null
 
 exit 0

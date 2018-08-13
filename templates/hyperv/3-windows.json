@@ -36,7 +36,6 @@
       "guest_os_type": "windows",
       "prevent_sudo": true,
       "run_list": [
-        "provision::chocolatey",
         "provision::powershell",
         "provision::powershell_modules"
       ]

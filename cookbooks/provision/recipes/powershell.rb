@@ -1,5 +1,6 @@
 return unless platform_family?('windows')
 
+# TODO: Add powershell_package_source resource
 powershell_script 'NuGet' do
   code <<-EOH
   Find-PackageProvider -Name NuGet -RequiredVersion 2.8.5.208 |

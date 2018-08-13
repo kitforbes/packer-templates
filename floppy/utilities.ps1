@@ -134,10 +134,10 @@ function Update-Item {
         $currentValue = (Get-Item -Path $Path).Value
         if ($currentValue -ne $Value) {
             Set-Item -Path $Path -Value $Value
-            Write-Output "'$Path' changed from '$currentValue' to '$Value'"
+            Write-Output -InputObject "'$Path' changed from '$currentValue' to '$Value'"
         }
         else {
-            Write-Output "'$Path' unchanged from '$currentValue'"
+            Write-Output -InputObject "'$Path' unchanged from '$currentValue'"
         }
     }
 }

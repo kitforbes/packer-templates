@@ -6,9 +6,10 @@ description 'This cookbook is used to configure a system during provisioning wit
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version '0.0.1'
 
-depends 'chocolatey'
-depends 'chocolatey_source'
-depends 'windows'
+# depends 'chocolatey'
+# depends 'chocolatey_source'
+# depends 'windows'
+# depends 'wsus-client'
 
 supports 'windows'
 

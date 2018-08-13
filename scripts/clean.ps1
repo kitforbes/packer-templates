@@ -4,15 +4,15 @@ if ($Env:PACKER_VERBOSE) { $VerbosePreference = "Continue" }
 
 . A:\utilities.ps1
 
-Write-Output "==> Cleaning updates..."
+Write-Output -InputObject "==> Cleaning updates..."
 Stop-Service -Name wuauserv -Force
 Remove-Item C:\Windows\SoftwareDistribution\Download\* -Recurse -Force -ErrorAction SilentlyContinue
 Start-Service -Name wuauserv
 
-Write-Output "", "==> Cleaning WinSxS with Dism..."
+Write-Output -InputObject "", "==> Cleaning WinSxS with Dism..."
 Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
 
-Write-Output "", "==> Removing non-essential content..."
+Write-Output -InputObject "", "==> Removing non-essential content..."
 @(
     "$env:LocaApppData\Nuget",
     "$env:LocaApppData\temp\*",
@@ -21,7 +21,7 @@ Write-Output "", "==> Removing non-essential content..."
     "$env:SystemRoot\winsxs\manifestcache"
 ) | ForEach-Object {
     if (Test-Path -Path $_) {
-        Write-Output "Removing $_"
+        Write-Output -InputObject "Removing $_"
         try {
             # Recursively assign ownership to the vagtant user.
             Takeown /D Y /R /F $_ | Out-Null
@@ -35,7 +35,7 @@ Write-Output "", "==> Removing non-essential content..."
     }
 }
 
-Write-Output "", "==> Defragging disk..."
+Write-Output -InputObject "", "==> Defragging disk..."
 if (Test-Command -Name 'Optimize-Volume') {
     Optimize-Volume -DriveLetter c
 }
@@ -43,7 +43,7 @@ else {
     Defrag.exe c: /H
 }
 
-Write-Output "", "==> Overwrite empty space..."
+Write-Output -InputObject "", "==> Overwrite empty space..."
 $FilePath = "C:\zero.tmp"
 $Volume = Get-WmiObject Win32_LogicalDisk -Filter "DeviceID='C:'"
 $ArraySize = 64kb

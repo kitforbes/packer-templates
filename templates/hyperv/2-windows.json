@@ -36,8 +36,7 @@
     {
       "type": "windows-shell",
       "inline": [
-        "@echo off",
-        "cmd.exe /c powershell.exe -File C:\\Windows\\Temp\\install_powershell.ps1"
+        "@cmd.exe /c powershell.exe -File C:\\Windows\\Temp\\install_powershell.ps1"
       ],
       "environment_vars": [
         "PACKER_VERBOSE={{ user `verbose` }}"

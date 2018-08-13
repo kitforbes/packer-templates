@@ -4,7 +4,7 @@ if ($Env:PACKER_VERBOSE) { $VerbosePreference = "Continue" }
 
 . A:\utilities.ps1
 
-Write-Output "", "Recompile DotNet cache..."
+Write-Output -InputObject "", "Recompile DotNet cache..."
 $result = Invoke-Process -FilePath "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\ngen.exe" -ArgumentList "update", "/force", "/queue", "/nologo", "/silent"
 if ($result -ne 0) { exit $result }
 

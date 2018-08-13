@@ -10,7 +10,7 @@ while ($true) {
     $process = $product | Invoke-CimMethod -MethodName Uninstall
     if ($process.ReturnValue -eq 1618) {
         $attempt++
-        Write-Output "Another msiexec process is in progress (attempt: $attempt)"
+        Write-Output -InputObject "Another msiexec process is in progress (attempt: $attempt)"
         if ($attempt -le 6) {
             Start-Sleep -Seconds 30
             continue
@@ -20,21 +20,21 @@ while ($true) {
             continue
         }
         else {
-            Write-Output "Uninstall failed."
+            Write-Output -InputObject "Uninstall failed."
             throw
         }
     }
     elseif ($process.ReturnValue -ne 0) {
-        Write-Output "Uninstall failed ($process.ReturnValue)."
+        Write-Output -InputObject "Uninstall failed ($process.ReturnValue)."
         throw
     }
     else {
-        Write-Output "Uninstall complete."
+        Write-Output -InputObject "Uninstall complete."
         break
     }
 }
 
-Write-Output "", "==> Attempting to remove Chef directories..."
+Write-Output -InputObject "", "==> Attempting to remove Chef directories..."
 Remove-Directory -Path "C:\chef"
 # Remove-Directory -Path "C:\opscode\chef"
 
@@ -47,6 +47,6 @@ Remove-Directory -Path "C:\chef"
 # $result = Invoke-Process -FilePath "choco" -ArgumentList "uninstall", "inspec", "--all-versions", "--yes"
 # if ($result -ne 0) { exit $result }
 
-# Write-Output "", "==> Attempting to remove opscode directory..."
+# Write-Output -InputObject "", "==> Attempting to remove opscode directory..."
 Remove-Directory -Path "C:\opscode"
 exit 0
