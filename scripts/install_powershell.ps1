@@ -38,7 +38,7 @@ function Get-PowerShell ($Source, $Destination, $Checksum) {
         try {
             $shellApplication = New-Object -Com Shell.Application
             $zipPackage = $shellApplication.NameSpace($file)
-            $destinationFolder = $shellApplication.NameSpace("$env:WinDir\Temp")
+            $destinationFolder = $shellApplication.NameSpace("$env:SystemRoot\Temp")
             $destinationFolder.CopyHere($zipPackage.Items(), 0x10)
         }
         catch {
@@ -49,11 +49,11 @@ function Get-PowerShell ($Source, $Destination, $Checksum) {
 
 function Expand-MsuFile ($Package) {
     Write-Output "", "==> Extracting '$Package'..."
-    $result = Invoke-Process -FilePath "$env:WinDir\System32\wusa.exe" -ArgumentList "$env:WinDir\Temp\$Package", "/extract:$env:WinDir\Temp", "/log:$env:WinDir\Temp\$($Package.Replace(".msu", ".log"))"
+    $result = Invoke-Process -FilePath "$env:SystemRoot\System32\wusa.exe" -ArgumentList "$env:SystemRoot\Temp\$Package", "/extract:$env:SystemRoot\Temp", "/log:$env:SystemRoot\Temp\$($Package.Replace(".msu", ".log"))"
 
     if ($result -ne 0) {
-        Get-Content -Path "$env:WinDir\Temp\$($Package.Replace(".msu", ".log"))"
-        Get-ChildItem -Path "$env:WinDir\Temp"
+        Get-Content -Path "$env:SystemRoot\Temp\$($Package.Replace(".msu", ".log"))"
+        Get-ChildItem -Path "$env:SystemRoot\Temp"
         Write-Output "Wusa Error: $($result)"
         exit $result
     }
@@ -61,9 +61,9 @@ function Expand-MsuFile ($Package) {
 
 function Install-CabFile ($Package) {
     Write-Output "", "==> Installing '$Package'..."
-    $result = Invoke-Process -FilePath "$env:WinDir\System32\Dism.exe" -ArgumentList '/online', '/add-package', "/PackagePath:$env:WinDir\Temp\$Package", '/Quiet', '/NoRestart'
+    $result = Invoke-Process -FilePath "$env:SystemRoot\System32\Dism.exe" -ArgumentList '/online', '/add-package', "/PackagePath:$env:SystemRoot\Temp\$Package", '/Quiet', '/NoRestart'
     if (0, 3010 -notcontains $result) {
-        Get-Content -Path "$env:WinDir\Logs\DISM\dism.log"
+        Get-Content -Path "$env:SystemRoot\Logs\DISM\dism.log"
         Write-Output "", "Dism Error: $($result)"
         exit $result
     }
@@ -79,12 +79,12 @@ switch ($osVersion) {
         if ($env:PROCESSOR_ARCHITECTURE -eq 'x86') {
             $url = 'https://download.microsoft.com/download/6/F/5/6F5FF66C-6775-42B0-86C4-47D41F2DA187/Win7-KB3191566-x86.zip'
             $checksum = 'eb7e2c4ce2c6cb24206474a6cb8610d9f4bd3a9301f1cd8963b4ff64e529f563'
-            $output = "$env:WinDir\Temp\Win7-KB3191566-x86.zip"
+            $output = "$env:SystemRoot\Temp\Win7-KB3191566-x86.zip"
         }
         else {
             $url = 'https://download.microsoft.com/download/6/F/5/6F5FF66C-6775-42B0-86C4-47D41F2DA187/Win7AndW2K8R2-KB3191566-x64.zip'
             $checksum = 'f383c34aa65332662a17d95409a2ddedadceda74427e35d05024cd0a6a2fa647'
-            $output = "$env:WinDir\Temp\Win7AndW2K8R2-KB3191566-x64.zip"
+            $output = "$env:SystemRoot\Temp\Win7AndW2K8R2-KB3191566-x64.zip"
         }
     }
     '6.2' {
@@ -94,19 +94,19 @@ switch ($osVersion) {
         else {
             $url = 'https://download.microsoft.com/download/6/F/5/6F5FF66C-6775-42B0-86C4-47D41F2DA187/W2K12-KB3191565-x64.msu'
             $checksum = '4a1385642c1f08e3be7bc70f4a9d74954e239317f50d1a7f60aa444d759d4f49'
-            $output = "$env:WinDir\Temp\W2K12-KB3191565-x64.msu"
+            $output = "$env:SystemRoot\Temp\W2K12-KB3191565-x64.msu"
         }
     }
     '6.3' {
         if ($env:PROCESSOR_ARCHITECTURE -eq 'x86') {
             $url = 'https://download.microsoft.com/download/6/F/5/6F5FF66C-6775-42B0-86C4-47D41F2DA187/Win8.1-KB3191564-x86.msu'
             $checksum = 'f3430a90be556a77a30bab3ac36dc9b92a43055d5fcc5869da3bfda116dbd817'
-            $output = "$env:WinDir\Temp\Win8.1-KB3191564-x86.msu.msu"
+            $output = "$env:SystemRoot\Temp\Win8.1-KB3191564-x86.msu.msu"
         }
         else {
             $url = 'https://download.microsoft.com/download/6/F/5/6F5FF66C-6775-42B0-86C4-47D41F2DA187/Win8.1AndW2K12R2-KB3191564-x64.msu'
             $checksum = 'a8d788fa31b02a999cc676fb546fc782e86c2a0acd837976122a1891ceee42c0'
-            $output = "$env:WinDir\Temp\Win8.1AndW2K12R2-KB3191564-x64.msu"
+            $output = "$env:SystemRoot\Temp\Win8.1AndW2K12R2-KB3191564-x64.msu"
         }
     }
     Default {
