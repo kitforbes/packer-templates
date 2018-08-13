@@ -1,3 +1,4 @@
+.vagrant/
 logs/*
 output/*
 packer_cache/

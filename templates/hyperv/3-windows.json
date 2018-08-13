@@ -46,9 +46,25 @@
       "restart_timeout": "1h"
     },
     {
+      "type": "chef-solo",
+      "remote_cookbook_paths": [
+        "C:/Windows/Temp/packer-chef-solo/cookbooks-0"
+      ],
+      "guest_os_type": "windows",
+      "prevent_sudo": true,
+      "skip_install": true,
+      "run_list": [
+        "provision::add_postunattend",
+        "provision::add_setup_complete",
+        "provision::vagrant"
+      ]
+    },
+    {
       "type": "powershell",
       "scripts": [
-        "scripts/uninstall_chef.ps1"
+        "scripts/uninstall_chef.ps1",
+        "scripts/run_ngen.ps1",
+        "scripts/clean.ps1"
       ],
       "elevated_user": "vagrant",
       "elevated_password": "vagrant",
@@ -57,7 +73,14 @@
       ]
     }
   ],
-  "post-processors": [],
+  "post-processors": [
+    {
+      "type": "vagrant",
+      "keep_input_artifact": true,
+      "output": "{{ user `output_dir` }}/{{ user `os_name` }}-{{ .Provider }}.box",
+      "vagrantfile_template": "templates/vagrant/windows.Vagrantfile"
+    }
+  ],
   "variables": {
     "os_name": "",
     "iso_checksum": "",

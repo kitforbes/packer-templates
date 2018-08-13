@@ -15,15 +15,9 @@ powershell_package 'PowerShellGet' do
 end
 
 # Dependency of 'PowerShellGet'
-powershell_package 'PackageManagement' do
-  version '1.1.7.0'
-  action :install
-end
-
-# Does not work
-# powershell_package 'PowerShellGet' do
-#   version '1.0.0.1'
-#   action :remove
+# powershell_package 'PackageManagement' do
+#   version '1.1.7.0'
+#   action :install
 # end
 
 powershell_script 'remove-builtin-PowerShellGet' do
@@ -34,12 +28,6 @@ powershell_script 'remove-builtin-PowerShellGet' do
   EOH
   not_if '(Get-Module -Name PowerShellGet -ListAvailable | Where-Object -Property Version -eq 1.0.0.1) -eq $null'
 end
-
-# Does not work
-# powershell_package 'PackageManagement' do
-#   version '1.0.0.1'
-#   action :remove
-# end
 
 powershell_script 'remove-builtin-PackageManagement' do
   code <<-EOH
