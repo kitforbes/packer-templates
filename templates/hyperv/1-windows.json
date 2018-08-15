@@ -3,8 +3,8 @@
     {
       "name": "test",
       "type": "hyperv-iso",
-      "output_directory": "{{ user `output_dir` }}/{{ user `os_name` }}-1-hyperv/",
-      "vm_name": "{{ user `os_name` }}-1",
+      "output_directory": "{{ user `output_dir` }}/{{ user `os_name` }}-{{ user `stage` }}-hyperv/",
+      "vm_name": "{{ user `os_name` }}-{{ user `stage` }}",
       "iso_url": "{{ user `source_url` }}",
       "iso_checksum": "{{ user `source_checksum` }}",
       "iso_checksum_type": "{{ user `source_checksum_type` }}",
@@ -48,6 +48,7 @@
     "source_url": "",
     "no_updates": "",
     "output_dir": "output",
+    "stage": "1",
     "verbose": ""
   }
 }

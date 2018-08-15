@@ -146,7 +146,8 @@ $variables = @(
     '--var', "`"source_checksum=$sourceChecksum`"",
     '--var', "`"source_checksum_type=$sourceChecksumType`"",
     '--var', "`"source_url=$sourceUrl`"",
-    '--var', "`"output_dir=$OutputDirectory`""
+    '--var', "`"output_dir=$OutputDirectory`"",
+    '--var', "`"stage=$Stage`""
 )
 
 if ($NoUpdates) {
