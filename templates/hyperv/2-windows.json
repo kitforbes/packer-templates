@@ -6,8 +6,8 @@
       "http_directory": "scripts",
       "output_directory": "{{ user `output_dir` }}/{{ user `os_name` }}-2-hyperv/",
       "vm_name": "{{ user `os_name` }}-2",
-      "iso_url": "{{ user `output_dir` }}/{{ user `os_name` }}-1-hyperv/Virtual Hard Disks/{{ user `os_name` }}-1.vhdx",
-      "iso_checksum_type": "none",
+      "iso_url": "{{ user `source_url` }}",
+      "iso_checksum_type": "{{ user `source_checksum_type` }}",
       "communicator": "winrm",
       "winrm_username": "vagrant",
       "winrm_password": "vagrant",
@@ -122,9 +122,9 @@
   "post-processors": [],
   "variables": {
     "os_name": "",
-    "iso_checksum": "",
-    "iso_checksum_type": "",
-    "iso_url": "",
+    "source_checksum": "",
+    "source_checksum_type": "",
+    "source_url": "",
     "no_updates": "",
     "output_dir": "output",
     "verbose": ""

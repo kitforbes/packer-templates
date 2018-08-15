@@ -2,9 +2,9 @@
   {
     "name": "Windows2012R2",
     "os_name": "win2012r2",
-    "iso_url_env_var": "ISO_WIN2012R2_X64",
-    "iso_url": "http://download.microsoft.com/download/6/2/A/62A76ABB-9990-4EFC-A4FE-C7D698DAEB96/9600.16384.WINBLUE_RTM.130821-1623_X64FRE_SERVER_EVAL_EN-US-IRM_SSS_X64FREE_EN-US_DV5.ISO",
-    "iso_checksum": "7E3F89DBFF163E259CA9B0D1F078DAAFD2FED513",
-    "iso_checksum_type": "sha1"
+    "source_url_env_var": "ISO_WIN2012R2_X64",
+    "source_url": "http://download.microsoft.com/download/6/2/A/62A76ABB-9990-4EFC-A4FE-C7D698DAEB96/9600.16384.WINBLUE_RTM.130821-1623_X64FRE_SERVER_EVAL_EN-US-IRM_SSS_X64FREE_EN-US_DV5.ISO",
+    "source_checksum": "7E3F89DBFF163E259CA9B0D1F078DAAFD2FED513",
+    "source_checksum_type": "sha1"
   }
 ]

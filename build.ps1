@@ -15,6 +15,9 @@ param(
     [String]
     $Action = "Test",
     [Parameter(Mandatory = $false)]
+    [String]
+    $OutputDirectory = "$PSScriptRoot/output",
+    [Parameter(Mandatory = $false)]
     [ValidateSet(1, 2, 3)]
     [Int]
     $Stage = 1,
@@ -48,22 +51,22 @@ $data = Get-Content -Path "$PSScriptRoot/build.data.json" | ConvertFrom-Json
 foreach ($datum in $data) {
     if ($datum.name -eq $Name) {
         $template = [PSCustomObject] @{
-            Name            = $datum.Name
-            OsName          = $datum.os_name
-            IsoUrlEnvVar    = $datum.iso_url_env_var
-            IsoUrl          = $datum.iso_url
-            IsoChecksum     = $datum.iso_checksum
-            IsoChecksumType = $datum.iso_checksum_type
+            Name               = $datum.Name
+            OsName             = $datum.os_name
+            SourceUrlEnvVar    = $datum.source_url_env_var
+            SourceUrl          = $datum.source_url
+            SourceChecksum     = $datum.source_checksum
+            SourceChecksumType = $datum.source_checksum_type
         }
 
         break
     }
 }
 
-if (-not [String]::IsNullOrWhiteSpace($template.IsoUrlEnvVar) -and (Test-Path -Path env:$($template.IsoUrlEnvVar))) {
-    $localIsoPath = (Get-Item -Path env:$($template.IsoUrlEnvVar)).Value
+if (-not [String]::IsNullOrWhiteSpace($template.SourceUrlEnvVar) -and (Test-Path -Path env:$($template.SourceUrlEnvVar))) {
+    $localIsoPath = (Get-Item -Path env:$($template.SourceUrlEnvVar)).Value
     if (-not [String]::IsNullOrWhiteSpace($localIsoPath) -and (Test-Path -Path $localIsoPath)) {
-        $template.IsoUrl = $localIsoPath
+        $template.SourceUrl = $localIsoPath
     }
     else {
         Write-Verbose -Message "File not found, using default ISO URL"
@@ -84,10 +87,9 @@ if ($Provider -eq 'Hyper-V') {
     }
 }
 
-$outputDirectory = "$PSScriptRoot/output"
-if (-not (Test-Path -Path $outputDirectory)) {
+if (-not (Test-Path -Path $OutputDirectory)) {
     Write-Output -InputObject '', "==> Creating output directory..."
-    New-Item -Path $outputDirectory -ItemType Directory
+    New-Item -Path $OutputDirectory -ItemType Directory
 }
 
 Remove-File -Path "$PSScriptRoot/logs/packer.log"
@@ -118,11 +120,33 @@ $env:PACKER_LOG_PATH = "$PSScriptRoot/logs/packer.log"
 $templateFilePath = "templates/$($Provider.ToLower().Replace('-', ''))/$Stage-windows.json"
 
 Write-Output -InputObject '', "==> Validating template..."
+$previousStage = $stage - 1
+if ($Provider -eq "Hyper-V") {
+    switch ($Stage) {
+        1 {
+            $sourceUrl = $template.SourceUrl
+            $sourceChecksum = $template.SourceChecksum
+            $sourceChecksumType = $template.SourceChecksumType
+        }
+        2 {
+            $sourceUrl = "$OutputDirectory/$($template.OsName)-$previousStage-hyperv/Virtual Hard Disks/$($template.OsName)-$previousStage.vhdx"
+            $sourceChecksum = ""
+            $sourceChecksumType = "none"
+        }
+        3 {
+            $sourceUrl = "$OutputDirectory/$($template.OsName)-$previousStage-hyperv/Virtual Hard Disks/$($template.OsName)-$previousStage.vhdx"
+            $sourceChecksum = ""
+            $sourceChecksumType = "none"
+        }
+    }
+}
+
 $variables = @(
     '--var', "`"os_name=$($template.OsName)`"",
-    '--var', "`"iso_checksum=$($template.IsoChecksum)`"",
-    '--var', "`"iso_checksum_type=$($template.IsoChecksumType)`"",
-    '--var', "`"iso_url=$($template.IsoUrl)`""
+    '--var', "`"source_checksum=$sourceChecksum`"",
+    '--var', "`"source_checksum_type=$sourceChecksumType`"",
+    '--var', "`"source_url=$sourceUrl`"",
+    '--var', "`"output_dir=$OutputDirectory`""
 )
 
 if ($NoUpdates) {
@@ -155,7 +179,7 @@ $result = Invoke-Process -FilePath "packer" -ArgumentList ($arguments + $variabl
 if ($result -ne 0) { exit $result }
 
 Write-Output -InputObject '', "==> Displaying artifacts..."
-Get-ChildItem -Path $outputDirectory -Include * -Exclude .gitkeep | ForEach-Object {
+Get-ChildItem -Path $OutputDirectory -Include * -Exclude .gitkeep | ForEach-Object {
     if ($_.PSIsContainer) {
         $type = "Directory"
         $size = (Get-ChildItem -Path $_.FullName -Recurse | Measure-Object -Property Length -Sum).Sum
