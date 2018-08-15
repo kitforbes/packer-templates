@@ -117,6 +117,20 @@
     {
       "type": "windows-restart",
       "restart_timeout": "1h"
+    },
+    {
+      "type": "powershell",
+      "script": "scripts/install_windows_updates.ps1",
+      "elevated_user": "vagrant",
+      "elevated_password": "vagrant",
+      "environment_vars": [
+        "PACKER_VERBOSE={{ user `verbose` }}",
+        "PACKER_NO_UPDATES={{ user `no_updates` }}"
+      ]
+    },
+    {
+      "type": "windows-restart",
+      "restart_timeout": "1h"
     }
   ],
   "post-processors": [],
