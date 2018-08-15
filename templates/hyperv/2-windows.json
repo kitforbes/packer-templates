@@ -63,8 +63,13 @@
       ]
     },
     {
+      "type": "file",
+      "source": "scripts/install_windows_updates.ps1",
+      "destination": "C:\\Windows\\Temp\\install_windows_updates.ps1"
+    },
+    {
       "type": "powershell",
-      "script": "scripts/install_windows_updates.ps1",
+      "inline": "& C:\\Windows\\Temp\\install_windows_updates.ps1",
       "elevated_user": "vagrant",
       "elevated_password": "vagrant",
       "environment_vars": [
@@ -78,7 +83,7 @@
     },
     {
       "type": "powershell",
-      "script": "scripts/install_windows_updates.ps1",
+      "inline": "& C:\\Windows\\Temp\\install_windows_updates.ps1",
       "elevated_user": "vagrant",
       "elevated_password": "vagrant",
       "environment_vars": [
@@ -92,7 +97,7 @@
     },
     {
       "type": "powershell",
-      "script": "scripts/install_windows_updates.ps1",
+      "inline": "& C:\\Windows\\Temp\\install_windows_updates.ps1",
       "elevated_user": "vagrant",
       "elevated_password": "vagrant",
       "environment_vars": [
@@ -106,7 +111,7 @@
     },
     {
       "type": "powershell",
-      "script": "scripts/install_windows_updates.ps1",
+      "inline": "& C:\\Windows\\Temp\\install_windows_updates.ps1",
       "elevated_user": "vagrant",
       "elevated_password": "vagrant",
       "environment_vars": [
@@ -120,7 +125,7 @@
     },
     {
       "type": "powershell",
-      "script": "scripts/install_windows_updates.ps1",
+      "inline": "& C:\\Windows\\Temp\\install_windows_updates.ps1",
       "elevated_user": "vagrant",
       "elevated_password": "vagrant",
       "environment_vars": [
