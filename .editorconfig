@@ -11,6 +11,9 @@ insert_final_newline = true
 [*.{json,xaml,xml,yaml,yml}]
 indent_size = 2
 
+[*.{json,xaml,xml,yaml,yml}.erb]
+indent_size = 2
+
 [*.rb]
 indent_size = 2
 
