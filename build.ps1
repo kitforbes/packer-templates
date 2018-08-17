@@ -23,7 +23,10 @@ param(
     $Stage = 1,
     [Parameter(Mandatory = $false)]
     [Switch]
-    $NoUpdates
+    $NoUpdates,
+    [Parameter(Mandatory = $false)]
+    [Switch]
+    $ClearOutput
 )
 
 $ErrorActionPreference = "Stop"
@@ -45,6 +48,20 @@ if ($isVerbose) {
     }
 
     ($parameters | Format-List | Out-String).Trim()
+}
+
+if ($ClearOutput) {
+    Get-ChildItem -Path $OutputDirectory -Include * -Exclude .gitkeep | ForEach-Object {
+        if ($_.PSIsContainer) {
+            Remove-Item -Path $_ -Force -Recurse -Verbose:$isVerbose
+        }
+        else {
+            Remove-Item -Path $_ -Force -Verbose:$isVerbose
+        }
+    }
+
+    Write-Output -InputObject '', "==> Ouput directory wiped."
+    exit 0
 }
 
 $data = Get-Content -Path "$PSScriptRoot/build.data.json" | ConvertFrom-Json
