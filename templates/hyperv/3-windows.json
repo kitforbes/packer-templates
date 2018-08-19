@@ -37,7 +37,9 @@
       "prevent_sudo": true,
       "run_list": [
         "provision::powershell",
-        "provision::powershell_modules"
+        "provision::powershell_modules",
+        "provision::remote_desktop",
+        "provision::file_sharing"
       ]
     },
     {
