@@ -1,5 +1,7 @@
 # Packer Templates
 
+This repository attempts to generalize the Packer process to reduce repetition and duplication.
+
 ## Execution Times
 
 Times are in minutes.
