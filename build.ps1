@@ -1,30 +1,34 @@
 #Requires -RunAsAdministrator
 
-[CmdletBinding()]
+[CmdletBinding(DefaultParameterSetName = "Default")]
 param(
-    [Parameter(Mandatory = $false)]
+    [Parameter(Mandatory = $false, ParameterSetName = "Default")]
     [ValidateSet("Windows2012R2")]
     [String]
     $Name = "Windows2012R2",
-    [Parameter(Mandatory = $false)]
+    [Parameter(Mandatory = $false, ParameterSetName = "Default")]
     [ValidateSet("Hyper-V")]
     [String]
     $Provider = "Hyper-V",
-    [Parameter(Mandatory = $false)]
+    [Parameter(Mandatory = $false, ParameterSetName = "Default")]
     [ValidateSet("Test")]
     [String]
     $Action = "Test",
-    [Parameter(Mandatory = $false)]
+    [Parameter(Mandatory = $false, ParameterSetName = "Default")]
+    [Parameter(Mandatory = $false, ParameterSetName = "Clean")]
     [String]
     $OutputDirectory = "$PSScriptRoot/output",
-    [Parameter(Mandatory = $false)]
+    [Parameter(Mandatory = $false, ParameterSetName = "Default")]
+    [String]
+    $LogDirectory = "$PSScriptRoot/logs",
+    [Parameter(Mandatory = $false, ParameterSetName = "Default")]
     [ValidateSet(1, 2, 3)]
     [Int]
     $Stage = 1,
-    [Parameter(Mandatory = $false)]
+    [Parameter(Mandatory = $false, ParameterSetName = "Default")]
     [Switch]
     $NoUpdates,
-    [Parameter(Mandatory = $false)]
+    [Parameter(Mandatory = $false, ParameterSetName = "Clean")]
     [Switch]
     $ClearOutput
 )
@@ -33,7 +37,7 @@ begin {
     $ErrorActionPreference = "Stop"
     $ProgressPreference = "SilentlyContinue"
 
-    . $PSScriptRoot/floppy/utilities.ps1
+    . "$PSScriptRoot/floppy/utilities.ps1"
 
     if (-not $PSScriptRoot) {
         $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
@@ -79,6 +83,16 @@ begin {
 }
 
 end {
+    # Remove any trailing backslashes from output directory.
+    if ($OutputDirectory -match "\\$") {
+        $OutputDirectory = $OutputDirectory.TrimEnd('\')
+    }
+
+    # Remove any trailing backslashes from log directory.
+    if ($LogDirectory -match "\\$") {
+        $LogDirectory = $LogDirectory.TrimEnd('\')
+    }
+
     if ($isVerbose) {
         $parameters = [PSCustomObject] @{}
         foreach ($parameter in $PSBoundParameters.GetEnumerator()) {
@@ -88,7 +102,8 @@ end {
         ($parameters | Format-List | Out-String).Trim()
     }
 
-    if ($ClearOutput) {
+    if ($PSCmdlet.ParameterSetName -eq "Clean") {
+        # Remove all files from output directory.
         Get-ChildItem -Path $OutputDirectory -Include * -Exclude .gitkeep | ForEach-Object {
             if ($_.PSIsContainer) {
                 Remove-Item -Path $_ -Force -Recurse -Verbose:$isVerbose
@@ -102,6 +117,7 @@ end {
         exit 0
     }
 
+    # Get values from data file.
     $data = Get-Content -Path "$PSScriptRoot/build.data.json" | ConvertFrom-Json
     foreach ($datum in $data) {
         if ($datum.name -eq $Name) {
@@ -118,6 +134,7 @@ end {
         }
     }
 
+    # Use local ISO if present.
     if (-not [String]::IsNullOrWhiteSpace($template.SourceUrlEnvVar) -and (Test-Path -Path env:$($template.SourceUrlEnvVar))) {
         $localIsoPath = (Get-Item -Path env:$($template.SourceUrlEnvVar)).Value
         if (-not [String]::IsNullOrWhiteSpace($localIsoPath) -and (Test-Path -Path $localIsoPath)) {
@@ -135,6 +152,7 @@ end {
         $template
     }
 
+    # Verify provider prerequisites.
     if ($Provider -eq 'Hyper-V') {
         # TODO: Check OS for correct command to use
         if ((Get-WindowsOptionalFeature -FeatureName Microsoft-Hyper-V -Online).State -ne "Enabled") {
@@ -142,39 +160,50 @@ end {
         }
     }
 
+    # Ensure output and logs directory exist.
     New-Directory -Path $OutputDirectory
-    Remove-File -Path "$PSScriptRoot/logs/packer.log"
+    New-Directory -Path $LogDirectory
 
+    # Delete Packer log file if present.
+    Remove-File -Path "$LogDirectory/packer.log"
+
+    # Delete vendored cookbooks.
     Write-Output -InputObject '', "==> Removing vendored cookbooks..."
     Remove-Directory -Path "$PSScriptRoot/vendor/cookbooks"
 
+    # Only verify cookbooks if required for the build.
     $useChef = $Stage -eq 3
     if ($useChef) {
+        # Get all cookbooks within the cookbooks directory.
         $cookbooks = Get-ChildItem -Path "$PSScriptRoot/cookbooks" |
             Where-Object -FilterScript { $_.PSIsContainer } |
             Select-Object -ExpandProperty Name
 
         foreach ($cookbook in $cookbooks) {
+            # Execute cookbook tests.
             Write-Output -InputObject '', "==> Testing '$cookbook' cookbook..."
             $result = Invoke-Process -FilePath 'chef' -ArgumentList 'exec', 'rake', '--rakefile', "$PSScriptRoot/cookbooks/$cookbook/Rakefile"
             if ($result -ne 0) { exit $result }
         }
 
         foreach ($cookbook in $cookbooks) {
+            # Acquire cookbook dependencies.
             Write-Output -InputObject '', "==> Acquiring dependencies for '$cookbook' cookbook..."
             $result = Invoke-Process -FilePath 'chef' -ArgumentList 'exec', 'berks', 'vendor', "$PSScriptRoot/vendor/cookbooks", "--berksfile=$PSScriptRoot/cookbooks/$cookbook/Berksfile", '--no-delete'
             if ($result -ne 0) { exit $result}
         }
     }
 
+    # Set Packer environment variables.
     $env:CHECKPOINT_DISABLE = 1
     $env:PACKER_CACHE_DIR = "$env:ALLUSERSPROFILE/.packer.d/cache"
     $env:PACKER_LOG = 1
-    $env:PACKER_LOG_PATH = "$PSScriptRoot/logs/packer.log"
+    $env:PACKER_LOG_PATH = "$LogDirectory/packer.log"
 
+    # Determine path to Packer template file.
     $templateFilePath = "templates/$($Provider.ToLower().Replace('-', ''))/$Stage-windows.json"
 
-    Write-Output -InputObject '', "==> Validating template..."
+    # Prepare sources based on standard locations.
     $previousStage = $stage - 1
     if ($Provider -eq "Hyper-V") {
         switch ($Stage) {
@@ -196,6 +225,7 @@ end {
         }
     }
 
+    # Prepare variables for Packer.
     $variables = @(
         '--var', "`"os_name=$($template.OsName)`"",
         '--var', "`"source_checksum=$sourceChecksum`"",
@@ -213,14 +243,18 @@ end {
         $variables += '--var', "`"verbose=true`""
     }
 
+    # Validate Packer template.
+    Write-Output -InputObject '', "==> Validating template..."
     $result = Invoke-Process -FilePath 'packer' -ArgumentList (@('validate', "--only=$($Action.ToLower())") + $variables + @($templateFilePath))
     if ($result -ne 0) { exit $result }
 
+    # Inspect Packer template.
     Write-Output -InputObject '', "==> Inspecting template..."
     $result = Invoke-Process -FilePath "packer" -ArgumentList 'inspect', $templateFilePath
     if ($result -ne 0) { exit $result }
 
-    Remove-File -Path "$PSScriptRoot/logs/packer.log"
+    # Delete Packer log file before executing the build.
+    Remove-File -Path "$LogDirectory/packer.log"
 
     $arguments = @(
         'build',
@@ -230,10 +264,12 @@ end {
 
     if ($isDebug) { $arguments += '--debug' }
 
+    # Build Packer template.
     Write-Output -InputObject '', "==> Building template..."
     $result = Invoke-Process -FilePath "packer" -ArgumentList ($arguments + $variables + @($templateFilePath))
     if ($result -ne 0) { exit $result }
 
+    # Get size of artefacts within output directory.
     Measure-OutputContent -Path $OutputDirectory
     exit 0
 }
