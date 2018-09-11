@@ -7,6 +7,7 @@ describe 'provision::powershell' do
 
     before do
       stub_command('(Get-PackageProvider -Name NuGet -ListAvailable | Where-Object -Property Version -eq 2.8.5.208) -eq $null')
+      stub_command('[Boolean](Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue) -eq $false')
       stub_command('(Get-Module -Name PowerShellGet -ListAvailable | Where-Object -Property Version -eq 1.0.0.1) -eq $null')
       stub_command('(Get-Module -Name PackageManagement -ListAvailable | Where-Object -Property Version -eq 1.0.0.1) -eq $null')
     end

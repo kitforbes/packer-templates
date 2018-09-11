@@ -6,8 +6,8 @@ description 'This cookbook is used to configure a system during provisioning wit
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version '0.0.1'
 
-# depends 'chocolatey'
-# depends 'chocolatey_source'
+depends 'chocolatey'
+depends 'chocolatey_source' if Chef::VERSION < 14.3
 # depends 'windows'
 # depends 'wsus-client'
 
