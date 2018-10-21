@@ -43,6 +43,10 @@ begin {
         $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
     }
 
+    # Import in-development PackerPS module
+    Remove-Module -Name "PackerPS" -Force -ErrorAction SilentlyContinue
+    Import-Module -Name "$PSScriptRoot\modules\PackerPS\src\PackerPS.psd1" -Force
+
     $isVerbose = [System.Management.Automation.ActionPreference]::SilentlyContinue -ne $VerbosePreference
     $isDebug = [System.Management.Automation.ActionPreference]::SilentlyContinue -ne $DebugPreference
 
@@ -227,46 +231,38 @@ end {
 
     # Prepare variables for Packer.
     $variables = @(
-        '--var', "`"os_name=$($template.OsName)`"",
-        '--var', "`"source_checksum=$sourceChecksum`"",
-        '--var', "`"source_checksum_type=$sourceChecksumType`"",
-        '--var', "`"source_url=$sourceUrl`"",
-        '--var', "`"output_dir=$OutputDirectory`"",
-        '--var', "`"stage=$Stage`""
+        "os_name=$($template.OsName)",
+        "source_checksum=$sourceChecksum",
+        "source_checksum_type=$sourceChecksumType",
+        "source_url=$sourceUrl",
+        "output_dir=$OutputDirectory",
+        "stage=$Stage"
     )
 
     if ($NoUpdates) {
-        $variables += '--var', "`"no_updates=true`""
+        $variables += "no_updates=true"
     }
 
     if ($isVerbose) {
-        $variables += '--var', "`"verbose=true`""
+        $variables += "verbose=true"
     }
 
     # Validate Packer template.
     Write-Output -InputObject '', "==> Validating template..."
-    $result = Invoke-Process -FilePath 'packer' -ArgumentList (@('validate', "--only=$($Action.ToLower())") + $variables + @($templateFilePath))
+    $result = Test-PackerTemplate -Path $templateFilePath -Only $Action -Variables $variables -Verbose:$isVerbose
     if ($result -ne 0) { exit $result }
 
     # Inspect Packer template.
     Write-Output -InputObject '', "==> Inspecting template..."
-    $result = Invoke-Process -FilePath "packer" -ArgumentList 'inspect', $templateFilePath
+    $result = Show-PackerTemplate -Path $templateFilePath -Verbose:$isVerbose
     if ($result -ne 0) { exit $result }
 
     # Delete Packer log file before executing the build.
     Remove-File -Path "$LogDirectory/packer.log"
 
-    $arguments = @(
-        'build',
-        '--force',
-        "--only=$($Action.ToLower())"
-    )
-
-    if ($isDebug) { $arguments += '--debug' }
-
     # Build Packer template.
     Write-Output -InputObject '', "==> Building template..."
-    $result = Invoke-Process -FilePath "packer" -ArgumentList ($arguments + $variables + @($templateFilePath))
+    $result = Invoke-PackerTemplate -Path $templateFilePath -Only $Action -Variables $variables -Force -Verbose:$isVerbose -Debug:$isDebug
     if ($result -ne 0) { exit $result }
 
     # Get size of artefacts within output directory.
