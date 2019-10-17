@@ -1,4 +1,5 @@
 function Test-PackerTemplate {
+    [Alias("Invoke-PackerValidate")]
     [CmdletBinding(DefaultParameterSetName = "Default")]
     [OutputType([Int])]
     param (

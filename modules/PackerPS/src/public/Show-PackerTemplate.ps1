@@ -1,4 +1,5 @@
 function Show-PackerTemplate {
+    [Alias("Invoke-PackerInspect")]
     [CmdletBinding(DefaultParameterSetName = "Default")]
     [OutputType([Int])]
     param (

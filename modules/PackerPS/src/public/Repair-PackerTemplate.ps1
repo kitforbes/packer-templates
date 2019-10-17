@@ -1,4 +1,5 @@
 function Repair-PackerTemplate {
+    [Alias("Invoke-PackerFix")]
     [CmdletBinding(DefaultParameterSetName = "Default")]
     param (
         # Parameter help description

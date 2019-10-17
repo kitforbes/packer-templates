@@ -1,4 +1,5 @@
 function Invoke-PackerTemplate {
+    [Alias("Invoke-PackerBuild")]
     [CmdletBinding(DefaultParameterSetName = "Default")]
     [OutputType([Int])]
     param (
