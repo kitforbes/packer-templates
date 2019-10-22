@@ -4,3 +4,6 @@ output/*
 packer_cache/
 vendor/
 *.box
+
+bin/
+obj/

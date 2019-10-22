@@ -11,3 +11,14 @@ Times are in minutes.
 Provider | Stage 1 | Stage 2 | Stage 3
 :--------|--------:|--------:|--------:
 Hyper-V  |       8 |     225 |     100
+
+
+## PowerShell Modules
+
+```powershell
+dotnet build
+```
+
+```powershell
+Import-Module modules/...
+```
