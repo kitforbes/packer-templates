@@ -10,7 +10,7 @@ Remove-Item C:\Windows\SoftwareDistribution\Download\* -Recurse -Force -ErrorAct
 Start-Service -Name wuauserv
 
 Write-Output -InputObject "", "==> Cleaning WinSxS with Dism..."
-Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
+Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase | Out-Null
 
 Write-Output -InputObject "", "==> Removing non-essential content..."
 @(

@@ -11,3 +11,9 @@ Times are in minutes.
 Provider | Stage 1 | Stage 2 | Stage 3
 :--------|--------:|--------:|--------:
 Hyper-V  |       8 |     225 |     100
+
+### Windows Server 2016
+
+Provider | Stage 1 | Stage 2 | Stage 3
+:--------|--------:|--------:|--------:
+Hyper-V  |      19 |     168 |      98

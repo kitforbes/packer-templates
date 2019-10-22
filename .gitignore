@@ -4,3 +4,5 @@ output/*
 packer_cache/
 vendor/
 *.box
+
+.delivery/

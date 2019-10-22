@@ -6,7 +6,7 @@ if ($Env:PACKER_NO_UPDATES) {
     Write-Output -InputObject "Skipping installation of Windows updates."
 }
 else {
-    Get-WindowsUpdate -WindowsUpdate -AcceptAll -Install -IgnoreReboot
+    Get-WindowsUpdate -WindowsUpdate -AcceptAll -Install -IgnoreReboot -IgnoreUserInput
 }
 
 exit 0

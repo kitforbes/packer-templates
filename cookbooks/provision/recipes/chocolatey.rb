@@ -6,3 +6,7 @@ chocolatey_source 'chocolatey' do
   source 'https://chocolatey.org/api/v2/'
   action :add
 end
+
+# chocolatey_package 'inspec' do
+#   action :install
+# end

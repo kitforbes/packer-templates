@@ -1,10 +1,42 @@
 [
   {
+    "name": "Windows2012R2Core",
+    "os_name": "win2012r2core",
+    "source_url_env_var": "",
+    "source_url": "http://download.microsoft.com/download/6/2/A/62A76ABB-9990-4EFC-A4FE-C7D698DAEB96/9600.16384.WINBLUE_RTM.130821-1623_X64FRE_SERVER_EVAL_EN-US-IRM_SSS_X64FREE_EN-US_DV5.ISO",
+    "source_checksum": "3bb1c60417e9aeb3f4ce0eb02189c0c84a1c6691",
+    "source_checksum_type": "sha1"
+  },
+  {
     "name": "Windows2012R2",
     "os_name": "win2012r2",
     "source_url_env_var": "ISO_WIN2012R2_X64",
     "source_url": "http://download.microsoft.com/download/6/2/A/62A76ABB-9990-4EFC-A4FE-C7D698DAEB96/9600.16384.WINBLUE_RTM.130821-1623_X64FRE_SERVER_EVAL_EN-US-IRM_SSS_X64FREE_EN-US_DV5.ISO",
     "source_checksum": "7E3F89DBFF163E259CA9B0D1F078DAAFD2FED513",
+    "source_checksum_type": "sha1"
+  },
+  {
+    "name": "Windows2016Core",
+    "os_name": "win2016core",
+    "source_url_env_var": "ISO_WIN2016_X64",
+    "source_url": "http://care.dlservice.microsoft.com/dl/download/1/6/F/16FA20E6-4662-482A-920B-1A45CF5AAE3C/14393.0.160715-1616.RS1_RELEASE_SERVER_EVAL_X64FRE_EN-US.ISO",
+    "source_checksum": "772700802951B36C8CB26A61C040B9A8DC3816A3",
+    "source_checksum_type": "sha1"
+  },
+  {
+    "name": "Windows2016",
+    "os_name": "win2016",
+    "source_url_env_var": "ISO_WIN2016_X64",
+    "source_url": "http://care.dlservice.microsoft.com/dl/download/1/6/F/16FA20E6-4662-482A-920B-1A45CF5AAE3C/14393.0.160715-1616.RS1_RELEASE_SERVER_EVAL_X64FRE_EN-US.ISO",
+    "source_checksum": "772700802951B36C8CB26A61C040B9A8DC3816A3",
+    "source_checksum_type": "sha1"
+  },
+  {
+    "name": "Windows10",
+    "os_name": "win10",
+    "source_url_env_var": "",
+    "source_url": "http://care.dlservice.microsoft.com/dl/download/C/3/9/C399EEA8-135D-4207-92C9-6AAB3259F6EF/10240.16384.150709-1700.TH1_CLIENTENTERPRISEEVAL_OEMRET_X64FRE_EN-US.ISO",
+    "source_checksum": "56ab095075be28a90bc0b510835280975c6bb2ce",
     "source_checksum_type": "sha1"
   }
 ]

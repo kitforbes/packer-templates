@@ -25,7 +25,7 @@
       "disk_size": 81920,
       "ram_size": 4096,
       "differencing_disk": false,
-      "skip_export": true,
+      "skip_export": false,
       "generation": 1,
       "boot_wait": "0s",
       "boot_command": [
