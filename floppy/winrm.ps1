@@ -40,14 +40,16 @@ Update-Item -Path "WSMan:\localhost\Service\AllowUnencrypted" -Value "true"
 # winrm set winrm/config/service '@{AllowUnencrypted="true"}'
 Update-Item -Path "WSMan:\localhost\Shell\MaxMemoryPerShellMB" -Value "2048"
 # winrm set winrm/config/winrs '@{MaxMemoryPerShellMB="2048"}'
-Update-Item -Path "WSMan:\localhost\MaxTimeoutms" -Value "1800000"
+Update-Item -Path "WSMan:\localhost\MaxTimeoutMS" -Value "1800000"
 
 Write-Output -InputObject "", "==> Restarting WinRM..."
 Restart-Service -Name WinRM
 
-Write-Output -InputObject "==> Add WinRM Firewall rule..."
-New-NetFirewallRule -DisplayName "WinRM-HTTP" -Direction Inbound -LocalPort 5985 -Protocol TCP -Action Allow | Out-Null
-# netsh advfirewall firewall add rule name="WinRM-HTTP" dir=in localport=5985 protocol=TCP action=allow
+Write-Output -InputObject "==> Add WinRM Firewall rules..."
+New-NetFirewallRule -DisplayName "Windows Remote Management (HTTP-In)" -Direction Inbound -LocalPort 5985 -Protocol TCP -Action Allow | Out-Null
+# netsh advfirewall firewall add rule name="Windows Remote Management (HTTP-In)" dir=in localport=5985 protocol=TCP action=allow
+New-NetFirewallRule -DisplayName "Windows Remote Management (HTTPS-In)" -Direction Inbound -LocalPort 5986 -Protocol TCP -Action Allow | Out-Null
+# netsh advfirewall firewall add rule name="Windows Remote Management (HTTPS-In)" dir=in localport=5986 protocol=TCP action=allow
 
 Write-Output -InputObject "==> Disable Server Manager task..."
 Get-ScheduledTask -TaskName ServerManager | Disable-ScheduledTask | Out-Null
